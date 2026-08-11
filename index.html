@@ -598,7 +598,7 @@ const WIND_MAX_MS = 15;
 
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-const DASHBOARD_VERSION = "1.3";
+const DASHBOARD_VERSION = "1.4";
 
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
@@ -746,9 +746,9 @@ function renderSemua(data, dariServer){
   document.getElementById('humNow').textContent = fmt(L.kelembaban, 0);
   document.getElementById('presNow').textContent = fmt(L.tekanan, 1);
   document.getElementById('altNow').textContent = fmt(L.ketinggian, 0);
-  document.getElementById('rainNow').textContent = fmt(L.curah_hujan, 1);
 
   const segmen = hitungHujanSegmen(hist);
+  document.getElementById('rainNow').textContent = segmen.total !== null ? fmt(segmen.total, 1) : fmt(L.curah_hujan, 1);
   document.getElementById('rainPagi').textContent = segmen.pagi !== null ? fmt(segmen.pagi, 1) : '--';
   document.getElementById('rainSiang').textContent = segmen.siang !== null ? fmt(segmen.siang, 1) : '--';
   document.getElementById('rainMalam').textContent = segmen.malam !== null ? fmt(segmen.malam, 1) : '--';
