@@ -252,7 +252,7 @@
 
   /* ---------- Page 2: Tren ---------- */
   .chart-card{margin-bottom:9px; padding:14px 14px 6px;}
-  .chart-box{height:118px;}
+  .chart-box{height:132px;}
   .note{
     font-size:11px;
     color:var(--text-dim);
@@ -598,7 +598,7 @@ const WIND_MAX_MS = 15;
 
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-const DASHBOARD_VERSION = "1.2";
+const DASHBOARD_VERSION = "1.3";
 
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
@@ -766,7 +766,12 @@ function renderSemua(data, dariServer){
   document.getElementById('needleDir').setAttribute('transform', 'rotate(' + deg + ' 50 50)');
 
   // ---------- PAGE 2: charts ----------
-  const labels = hist.map(h => h.jam || new Date(h.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}));
+  const labels = hist.map(h => {
+    if (!h.timestamp) return h.jam || '';
+    const d = new Date(h.timestamp);
+    return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) + ' ' +
+           d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  });
   chartSuhu = buatLineChart(chartSuhu, 'chartSuhu', labels, hist.map(h => h.suhu), '#E85A2B');
   chartHum  = buatLineChart(chartHum,  'chartHum',  labels, hist.map(h => h.kelembaban), '#2E9CCA');
   chartPres = buatLineChart(chartPres, 'chartPres', labels, hist.map(h => h.tekanan), '#F0A93E');
@@ -793,12 +798,28 @@ function buatLineChart(chartObj, canvasId, labels, values, color){
   if (chartObj) chartObj.destroy();
   return new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets: [{ data: values, borderColor: color, backgroundColor: color + '22', borderWidth: 2.5, pointRadius: 0, tension: 0.35, fill: true }] },
+    data: { labels, datasets: [{ data: values, borderColor: color, backgroundColor: color + '22', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, tension: 0.35, fill: true }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => items[0] ? items[0].label : ''
+          }
+        }
+      },
       scales: {
-        x: { display: false },
+        x: {
+          ticks: {
+            color: '#8A7A63',
+            font: { family: 'IBM Plex Mono', size: 8 },
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 5
+          },
+          grid: { display: false }
+        },
         y: { grid: { color: 'rgba(43,33,23,0.06)' }, ticks: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 9 } } }
       }
     }
