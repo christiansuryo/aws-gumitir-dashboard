@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Automatic Weather Station - Kebun Gunung Gumitir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#FDF6E9;
+    --surface:#FFFFFF;
+    --surface-2:#F5EAD2;
+    --text:#2B2117;
+    --text-dim:#8A7A63;
+    --ember:#E85A2B;
+    --ember-light:#F17B4D;
+    --gold:#F0A93E;
+    --sky:#2E9CCA;
+    --sky-light:#5CBADD;
+    --night:#5B5FA0;
+    --night-tint:#EEEEF9;
+    --line:rgba(43,33,23,0.10);
+    --shadow:0 2px 10px rgba(43,33,23,0.06);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    background-image:radial-gradient(ellipse at top, rgba(240,169,62,0.14), transparent 55%);
+    color:var(--text);
+    font-family:'IBM Plex Sans',sans-serif;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    padding:16px 20px 12px;
+    flex-shrink:0;
+    gap:10px;
+  }
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--text-dim);
+    margin-bottom:3px;
+  }
+  .verbadge{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px;
+    background:var(--surface-2);
+    color:var(--ember);
+    padding:1.5px 7px;
+    border-radius:20px;
+    letter-spacing:0.02em;
+  }
+  .wordmark{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:18px;
+    letter-spacing:0.01em;
+    line-height:1.15;
+  }
+  .wordmark span{color:var(--ember);}
+  .status-block{
+    text-align:right;
+    flex-shrink:0;
+  }
+  .today-date{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    color:var(--text-dim);
+    margin-bottom:5px;
+    white-space:nowrap;
+  }
+  .status{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:7px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--text-dim);
+  }
+  .dot-live{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--ember);
+    box-shadow:0 0 0 0 rgba(232,90,43,0.5);
+    animation:pulse 2.2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(232,90,43,0.45);}
+    70%{box-shadow:0 0 0 7px rgba(232,90,43,0);}
+    100%{box-shadow:0 0 0 0 rgba(232,90,43,0);}
+  }
+  .pager{
+    flex:1;
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .pager::-webkit-scrollbar{display:none;}
+  .page{
+    min-width:100%;
+    scroll-snap-align:start;
+    padding:4px 18px 10px;
+    overflow-y:auto;
+  }
+  .page-title{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--text-dim);
+    margin:4px 0 14px;
+  }
+
+  /* ---------- Kartu umum ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:14px 16px;
+    box-shadow:var(--shadow);
+  }
+  .icon{width:20px; height:20px; flex-shrink:0;}
+  .card-label{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    color:var(--text-dim);
+    margin-bottom:8px;
+  }
+  .card-value{
+    font-family:'Fraunces',serif;
+    font-size:28px;
+    font-weight:500;
+    line-height:1;
+  }
+  .card-value small{
+    font-size:13px;
+    color:var(--text-dim);
+    font-family:'IBM Plex Sans',sans-serif;
+    font-weight:400;
+  }
+
+  /* ---------- Page 1: grid kartu ---------- */
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-bottom:9px;
+  }
+  .rain-widget{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .ruler-svg{width:44px; height:82px; flex-shrink:0;}
+  .rain-segments{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .rseg{
+    border-radius:12px;
+    padding:10px 6px 9px;
+    text-align:center;
+  }
+  .rseg-pagi{background:#FEF3DC;}
+  .rseg-siang{background:#FDEAE0;}
+  .rseg-malam{background:var(--night-tint);}
+  .rseg-icon{width:22px; height:22px; margin-bottom:5px;}
+  .rseg-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--text-dim);
+    margin-bottom:3px;
+  }
+  .rseg-value{
+    font-family:'Fraunces',serif;
+    font-size:16px;
+    font-weight:500;
+  }
+  .rseg-value small{
+    font-size:10px;
+    font-family:'IBM Plex Sans',sans-serif;
+    color:var(--text-dim);
+  }
+  .rain-total{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:linear-gradient(90deg, #E7F4FA, #FDF6E9);
+    border-radius:12px;
+    padding:11px 14px;
+  }
+  .rain-total-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.07em;
+    color:var(--text-dim);
+  }
+  .rain-total-value{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    font-weight:600;
+    color:var(--sky);
+  }
+  .rain-total-value small{
+    font-size:12px;
+    font-family:'IBM Plex Sans',sans-serif;
+    color:var(--text-dim);
+  }
+  .speedo-widget{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .compass-widget{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .gauge-svg, .compass-svg{width:84px; height:84px; flex-shrink:0;}
+  .widget-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-bottom:9px;
+  }
+
+  /* ---------- Page 2: Tren ---------- */
+  .chart-card{margin-bottom:9px; padding:14px 14px 6px;}
+  .chart-box{height:118px;}
+  .note{
+    font-size:11px;
+    color:var(--text-dim);
+    line-height:1.5;
+    margin:10px 2px 4px;
+  }
+
+  /* ---------- Page 3: Analisa Pembungaan ---------- */
+  .insight-card{
+    padding:16px;
+    margin-bottom:9px;
+  }
+  .insight-title{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    font-weight:500;
+    color:var(--ember);
+    margin-bottom:6px;
+  }
+  .insight-body{
+    font-size:12.5px;
+    color:var(--text-dim);
+    line-height:1.55;
+  }
+  .metric-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:9px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .metric-row:last-child{border-bottom:none;}
+  .metric-row .k{font-size:12px; color:var(--text-dim);}
+  .metric-row .v{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:14px;
+    font-weight:500;
+  }
+  .badge{
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:20px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .badge.dry{background:rgba(232,90,43,0.12); color:var(--ember);}
+  .badge.wet{background:rgba(46,156,202,0.14); color:var(--sky);}
+
+  /* ---------- Nav bawah ---------- */
+  .nav{
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    padding:10px 0 18px;
+  }
+  .arrow-btn{
+    background:none;
+    border:none;
+    color:var(--text-dim);
+    font-size:20px;
+    width:34px;height:34px;
+    border-radius:50%;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background 0.2s, color 0.2s;
+  }
+  .arrow-btn:hover{background:var(--surface-2); color:var(--text);}
+  .beans{display:flex; gap:9px;}
+  .bean{
+    width:11px;height:8px;
+    border-radius:50%;
+    background:var(--surface-2);
+    cursor:pointer;
+    transition:background 0.4s, transform 0.3s;
+  }
+  .bean.active{
+    background:var(--ember);
+    transform:scale(1.25);
+  }
+  .bean.passed{background:var(--gold);}
+
+  @media (max-width:380px){
+    .card-value{font-size:24px;}
+    .gauge-svg, .compass-svg{width:72px; height:72px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Automatic Weather Station <span class="verbadge" id="versionBadge">v1.0</span></div>
+    <div class="wordmark">Kebun Gunung <span>Gumitir</span></div>
+  </div>
+  <div class="status-block">
+    <div class="today-date" id="todayDate">--</div>
+    <div class="status">
+      <div class="dot-live"></div>
+      <span id="lastUpdate">memuat...</span>
+    </div>
+  </div>
+</div>
+
+<div class="pager" id="pager">
+
+  <!-- PAGE 1: RINGKASAN LENGKAP -->
+  <div class="page" id="page-0">
+    <div class="page-title">Ringkasan Kondisi Saat Ini</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.6"><path d="M12 3a2 2 0 0 0-2 2v9.17a3.5 3.5 0 1 0 4 0V5a2 2 0 0 0-2-2z"/><path d="M12 8v6"/></svg>
+          Suhu
+        </div>
+        <div class="card-value"><span id="tempNow">--</span><small> °C</small></div>
+      </div>
+      <div class="card">
+        <div class="card-label">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6"><path d="M12 3s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg>
+          Kelembaban
+        </div>
+        <div class="card-value"><span id="humNow">--</span><small> %</small></div>
+      </div>
+      <div class="card">
+        <div class="card-label">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          Tekanan
+        </div>
+        <div class="card-value"><span id="presNow">--</span><small> hPa</small></div>
+      </div>
+      <div class="card">
+        <div class="card-label">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.6"><path d="M3 20l6-11 4 6 3-5 5 10z"/></svg>
+          Ketinggian
+        </div>
+        <div class="card-value"><span id="altNow">--</span><small> mdpl</small></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:9px; padding:14px 16px;">
+      <div class="card-label">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6">
+          <path d="M7 15a4 4 0 0 1 0-8 5.5 5.5 0 0 1 10.6-1.5A4.5 4.5 0 0 1 17 15H7z"/>
+          <path d="M9 19l-1 2M13 19l-1 2M17 19l-1 2" stroke-linecap="round"/>
+        </svg>
+        Curah Hujan Hari Ini
+      </div>
+
+      <div class="rain-segments">
+        <div class="rseg rseg-pagi">
+          <svg class="rseg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.7">
+            <path d="M12 3v2M4.2 11H2M22 11h-2.2M5.6 4.6l1.4 1.4M18.4 4.6L17 6" stroke-linecap="round"/>
+            <path d="M6 11a6 6 0 0 1 12 0" />
+            <path d="M3 15h18" stroke-linecap="round"/>
+          </svg>
+          <div class="rseg-label">Pagi</div>
+          <div class="rseg-value"><span id="rainPagi">--</span> <small>mm</small></div>
+        </div>
+
+        <div class="rseg rseg-siang">
+          <svg class="rseg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.7">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke-linecap="round"/>
+          </svg>
+          <div class="rseg-label">Siang</div>
+          <div class="rseg-value"><span id="rainSiang">--</span> <small>mm</small></div>
+        </div>
+
+        <div class="rseg rseg-malam">
+          <svg class="rseg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--night)" stroke-width="1.7">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/>
+          </svg>
+          <div class="rseg-label">Malam</div>
+          <div class="rseg-value"><span id="rainMalam">--</span> <small>mm</small></div>
+        </div>
+      </div>
+
+      <div class="rain-total">
+        <div class="rain-total-label">Kumulatif Hari Ini</div>
+        <div class="rain-total-value"><span id="rainNow">--</span><small> mm</small></div>
+      </div>
+    </div>
+
+    <div class="widget-row">
+      <div class="card speedo-widget">
+        <div>
+          <svg class="gauge-svg" viewBox="0 0 100 70">
+            <path d="M10 60 A40 40 0 0 1 90 60" fill="none" stroke="var(--surface-2)" stroke-width="7" stroke-linecap="round"/>
+            <path id="speedoArc" d="M10 60 A40 40 0 0 1 90 60" fill="none" stroke="var(--ember)" stroke-width="7" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="126"/>
+            <g id="needle" transform="rotate(-90 50 60)">
+              <line x1="50" y1="60" x2="50" y2="26" stroke="var(--text)" stroke-width="2.4" stroke-linecap="round"/>
+            </g>
+            <circle cx="50" cy="60" r="4" fill="var(--gold)"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-label">Kec. Angin</div>
+          <div class="card-value" style="font-size:22px"><span id="windSpeedNow">--</span><small> m/s</small></div>
+        </div>
+      </div>
+
+      <div class="card compass-widget">
+        <div>
+          <svg class="compass-svg" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--surface-2)" stroke-width="1.4"/>
+            <text x="50" y="15" text-anchor="middle" fill="var(--text-dim)" font-family="IBM Plex Mono" font-size="9">U</text>
+            <text x="88" y="53" text-anchor="middle" fill="var(--text-dim)" font-family="IBM Plex Mono" font-size="9">T</text>
+            <text x="50" y="92" text-anchor="middle" fill="var(--text-dim)" font-family="IBM Plex Mono" font-size="9">S</text>
+            <text x="12" y="53" text-anchor="middle" fill="var(--text-dim)" font-family="IBM Plex Mono" font-size="9">B</text>
+            <g id="needleDir" transform="rotate(0 50 50)">
+              <polygon points="50,16 45,50 55,50" fill="var(--ember)"/>
+              <polygon points="50,84 45,50 55,50" fill="var(--surface-2)"/>
+            </g>
+            <circle cx="50" cy="50" r="4" fill="var(--gold)"/>
+          </svg>
+        </div>
+        <div>
+          <div class="card-label">Arah Angin</div>
+          <div class="card-value" style="font-size:17px" id="windDirNow">--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: TREN -->
+  <div class="page" id="page-1">
+    <div class="page-title">Tren Terkini</div>
+
+    <div class="card chart-card">
+      <div class="card-label">Suhu (°C)</div>
+      <div class="chart-box"><canvas id="chartSuhu"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <div class="card-label">Kelembaban (%)</div>
+      <div class="chart-box"><canvas id="chartHum"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <div class="card-label">Tekanan (hPa)</div>
+      <div class="chart-box"><canvas id="chartPres"></canvas></div>
+    </div>
+    <div class="card chart-card">
+      <div class="card-label">Curah Hujan Harian (mm)</div>
+      <div class="chart-box"><canvas id="chartRainHarian"></canvas></div>
+    </div>
+    <div class="note" id="trenNote">Menampilkan data yang tersedia sejak pemasangan sensor.</div>
+  </div>
+
+  <!-- PAGE 3: ANALISA PEMBUNGAAN -->
+  <div class="page" id="page-2">
+    <div class="page-title">Analisa &amp; Forecast Pembungaan</div>
+
+    <div class="card insight-card">
+      <div class="insight-title" id="fenomenaTitle">Mendeteksi pola...</div>
+      <div class="insight-body" id="fenomenaBody">Menganalisa data curah hujan untuk mendeteksi "hujan pembuka" (rain trigger).</div>
+    </div>
+
+    <div class="card" style="margin-bottom:9px;">
+      <div class="metric-row">
+        <div class="k">Hari kering berturut-turut</div>
+        <div class="v" id="hariKering">--</div>
+      </div>
+      <div class="metric-row">
+        <div class="k">Curah hujan 7 hari terakhir</div>
+        <div class="v" id="hujan7Hari">--</div>
+      </div>
+      <div class="metric-row">
+        <div class="k">Status periode saat ini</div>
+        <div class="v"><span class="badge" id="badgePeriode">--</span></div>
+      </div>
+      <div class="metric-row">
+        <div class="k">Proyeksi jendela pembungaan</div>
+        <div class="v" id="proyeksi">--</div>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="card-label">Curah Hujan Harian &ndash; Periode Taksasi Bunga</div>
+      <div class="chart-box"><canvas id="chartFlowering"></canvas></div>
+    </div>
+
+    <div class="insight-body" style="margin:10px 2px;">
+      Prinsip: pembungaan kopi robusta umumnya dipicu oleh hujan &ge;5&ndash;10mm setelah
+      masa kering, dengan bunga mekar 7&ndash;10 hari setelahnya. Data di atas dihitung
+      otomatis dari histori curah hujan yang terekam AWS ini.
+    </div>
+
+    <div class="page-title" style="margin-top:18px;">Histori 5 Tahun &middot; CH Bunga vs Produksi</div>
+
+    <div class="card chart-card">
+      <div class="card-label">CH Periode Bunga (Jul&ndash;Okt) &amp; Produksi Tahun Berikutnya</div>
+      <div class="chart-box" style="height:170px;"><canvas id="chartHistori"></canvas></div>
+    </div>
+
+    <div class="card insight-card">
+      <div class="insight-title">Korelasi Negatif Terbukti (r = &minus;0,88)</div>
+      <div class="insight-body">
+        Semakin basah periode pembungaan (Jul&ndash;Okt), semakin rendah produksi tahun
+        berikutnya. CH bunga 2022 (963mm) &rarr; produksi 2023 hanya 120.789 kg (terendah
+        6 tahun). CH bunga 2024 yang lebih kering (687mm) &rarr; produksi 2025 melonjak
+        ke 437.837 kg (tertinggi). Pola ini konsisten di hampir semua tahun kecuali 2021.
+      </div>
+    </div>
+
+    <div class="card insight-card">
+      <div class="insight-title">Proyeksi Musim Ini</div>
+      <div class="insight-body">
+        CH bunga 2025 tercatat 1.052mm &mdash; tertinggi dalam 6 tahun, melebihi 2022
+        (963mm) yang sebelumnya menyebabkan produksi terendah. Taksasi buah 2026 dari
+        sampling pohon menunjukkan 274.727 kg (rasio 0,71x terhadap taksasi bunga),
+        konsisten dengan pola historis: CH bunga &gt;800mm cenderung menghasilkan rasio
+        taksasi buah/bunga di bawah 0,75x. AWS ini akan merekam CH bunga musim berjalan
+        secara otomatis untuk memperkuat proyeksi tahun-tahun berikutnya.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav">
+  <button class="arrow-btn" id="prevBtn">&#8249;</button>
+  <div class="beans" id="beans">
+    <div class="bean" data-i="0"></div>
+    <div class="bean" data-i="1"></div>
+    <div class="bean" data-i="2"></div>
+  </div>
+  <button class="arrow-btn" id="nextBtn">&#8250;</button>
+</div>
+
+<script>
+// ============================================================
+// KONFIGURASI
+// ============================================================
+const API_URL = "https://script.google.com/macros/s/AKfycbwOve9m3PhrEai5IlqIfmJligdyR0oxN_ohr-lfzRP6yRACEshhZvmI18DUDU-mBOO7/exec";
+const REFRESH_MS = 60000;
+const WIND_MAX_MS = 15;
+
+// Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
+// tahu versi mana yang sedang tampil di HP/laptop kamu
+const DASHBOARD_VERSION = "1.2";
+
+document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
+document.getElementById('todayDate').textContent =
+  new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+// ============================================================
+// TANGGAL SIKLUS CURAH HUJAN (06:00 - 05:59 keesokan harinya)
+// Hujan jam 02:00 tgl 11 Agustus dihitung sebagai bagian dari
+// siklus tanggal 10 Agustus (belum ganti hari sampai jam 06:00)
+// ============================================================
+function tanggalSiklus(waktu){
+  const d = new Date(waktu);
+  if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+  return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'});
+}
+
+// ============================================================
+// HITUNG CURAH HUJAN PER SEGMEN WAKTU (pagi/siang/malam) DALAM
+// SIKLUS HARI BERJALAN - segmen: Pagi 06-10:59, Siang 11-16:59,
+// Malam 17:00-05:59 (melewati tengah malam, tetap 1 siklus yang sama)
+// ============================================================
+function segmenWaktu(jam){
+  if (jam >= 6 && jam < 11) return 'pagi';
+  if (jam >= 11 && jam < 17) return 'siang';
+  return 'malam';
+}
+
+function hitungHujanSegmen(hist){
+  const siklusSekarang = tanggalSiklus(new Date());
+  const dataSiklusIni = hist
+    .filter(h => h.timestamp && tanggalSiklus(h.timestamp) === siklusSekarang)
+    .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+  if (dataSiklusIni.length === 0) return { pagi: null, siang: null, malam: null, total: null };
+
+  const base = Number(dataSiklusIni[0].curah_hujan) || 0;
+  const akhirSegmen = { pagi: null, siang: null, malam: null };
+
+  dataSiklusIni.forEach(h => {
+    const seg = segmenWaktu(new Date(h.timestamp).getHours());
+    akhirSegmen[seg] = Number(h.curah_hujan) || 0;
+  });
+
+  let prev = base;
+  const hasil = {};
+  ['pagi', 'siang', 'malam'].forEach(seg => {
+    if (akhirSegmen[seg] !== null) {
+      hasil[seg] = Math.max(0, Number((akhirSegmen[seg] - prev).toFixed(1)));
+      prev = akhirSegmen[seg];
+    } else {
+      hasil[seg] = 0;
+    }
+  });
+  hasil.total = Math.max(0, Number((prev - base).toFixed(1)));
+  return hasil;
+}
+
+// ============================================================
+// NAVIGASI HALAMAN
+// ============================================================
+const pager = document.getElementById('pager');
+const beans = document.querySelectorAll('.bean');
+const totalPages = beans.length;
+let currentPage = 0;
+
+function gotoPage(i){
+  i = Math.max(0, Math.min(totalPages - 1, i));
+  currentPage = i;
+  pager.scrollTo({ left: i * pager.clientWidth, behavior: 'smooth' });
+  updateDots();
+}
+function updateDots(){
+  beans.forEach((c, idx) => {
+    c.classList.toggle('active', idx === currentPage);
+    c.classList.toggle('passed', idx < currentPage);
+  });
+}
+pager.addEventListener('scroll', () => {
+  const i = Math.round(pager.scrollLeft / pager.clientWidth);
+  if (i !== currentPage) { currentPage = i; updateDots(); }
+});
+document.getElementById('prevBtn').addEventListener('click', () => gotoPage(currentPage - 1));
+document.getElementById('nextBtn').addEventListener('click', () => gotoPage(currentPage + 1));
+beans.forEach(c => c.addEventListener('click', () => gotoPage(parseInt(c.dataset.i))));
+window.addEventListener('resize', () => gotoPage(currentPage));
+
+// ============================================================
+// DATA CONTOH
+// ============================================================
+function buatDataContoh(){
+  const now = new Date();
+  const history = [];
+  let kumulatif = 0;
+  for (let i = 47; i >= 0; i--){
+    const t = new Date(now.getTime() - i * 30 * 60000);
+    if (Math.random() > 0.85) kumulatif += (Math.random() * 2).toFixed(1) * 1;
+    history.push({
+      timestamp: t.toISOString(),
+      jam: t.getHours() + ':00',
+      suhu: (24 + Math.sin(i/6) * 4 + Math.random()).toFixed(1) * 1,
+      kelembaban: (55 + Math.cos(i/5) * 15).toFixed(0) * 1,
+      tekanan: (955 + Math.sin(i/7) * 3).toFixed(1) * 1,
+      curah_hujan: kumulatif,
+      kecepatan_angin: (1 + Math.random() * 3).toFixed(2) * 1,
+      arah_derajat: [0,45,90,135,180,225,270,315][i % 8],
+      arah_kompas: ["Utara","Timur Laut","Timur","Tenggara","Selatan","Barat Daya","Barat","Barat Laut"][i % 8],
+      ketinggian: 680,
+      sumber: "Contoh"
+    });
+  }
+  return { latest: history[history.length - 1], history: history };
+}
+const DATA_CONTOH = buatDataContoh();
+
+// ============================================================
+// AMBIL DATA
+// ============================================================
+let chartSuhu, chartHum, chartPres, chartRainHarian, chartFlowering;
+
+async function muatData(){
+  let data, dariServer = true;
+  try {
+    const res = await fetch(API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    data = await res.json();
+    if (!data.latest) throw new Error("Belum ada data");
+  } catch (err) {
+    console.warn("Gagal ambil data asli, pakai contoh:", err);
+    data = DATA_CONTOH;
+    dariServer = false;
+  }
+  renderSemua(data, dariServer);
+}
+
+function renderSemua(data, dariServer){
+  const L = data.latest;
+  const hist = data.history || [];
+
+  document.getElementById('lastUpdate').textContent =
+    (dariServer ? "update " : "contoh ") +
+    new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+
+  // ---------- PAGE 1 ----------
+  document.getElementById('tempNow').textContent = fmt(L.suhu, 1);
+  document.getElementById('humNow').textContent = fmt(L.kelembaban, 0);
+  document.getElementById('presNow').textContent = fmt(L.tekanan, 1);
+  document.getElementById('altNow').textContent = fmt(L.ketinggian, 0);
+  document.getElementById('rainNow').textContent = fmt(L.curah_hujan, 1);
+
+  const segmen = hitungHujanSegmen(hist);
+  document.getElementById('rainPagi').textContent = segmen.pagi !== null ? fmt(segmen.pagi, 1) : '--';
+  document.getElementById('rainSiang').textContent = segmen.siang !== null ? fmt(segmen.siang, 1) : '--';
+  document.getElementById('rainMalam').textContent = segmen.malam !== null ? fmt(segmen.malam, 1) : '--';
+
+  const windSpeed = Number(L.kecepatan_angin) || 0;
+  document.getElementById('windSpeedNow').textContent = fmt(windSpeed, 1);
+  const windPct = Math.max(0, Math.min(1, windSpeed / WIND_MAX_MS));
+  const arcLen = 126;
+  document.getElementById('speedoArc').style.strokeDashoffset = arcLen - (arcLen * windPct);
+  const needleDeg = -90 + (windPct * 180);
+  document.getElementById('needle').setAttribute('transform', 'rotate(' + needleDeg + ' 50 60)');
+
+  document.getElementById('windDirNow').textContent = L.arah_kompas || '--';
+  const deg = Number(L.arah_derajat) || 0;
+  document.getElementById('needleDir').setAttribute('transform', 'rotate(' + deg + ' 50 50)');
+
+  // ---------- PAGE 2: charts ----------
+  const labels = hist.map(h => h.jam || new Date(h.timestamp).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}));
+  chartSuhu = buatLineChart(chartSuhu, 'chartSuhu', labels, hist.map(h => h.suhu), '#E85A2B');
+  chartHum  = buatLineChart(chartHum,  'chartHum',  labels, hist.map(h => h.kelembaban), '#2E9CCA');
+  chartPres = buatLineChart(chartPres, 'chartPres', labels, hist.map(h => h.tekanan), '#F0A93E');
+
+  const harian = hitungHujanHarian(hist);
+  chartRainHarian = buatBarChart(chartRainHarian, 'chartRainHarian', harian.labels, harian.values, '#2E9CCA');
+
+  if (harian.labels.length < 3) {
+    document.getElementById('trenNote').textContent =
+      'Data historis baru mencakup ' + harian.labels.length + ' hari sejak pemasangan sensor - grafik akan semakin lengkap seiring waktu.';
+  }
+
+  // ---------- PAGE 3 ----------
+  renderAnalisaPembungaan(hist, harian);
+}
+
+function fmt(v, d){
+  if (v === undefined || v === null || v === '' || isNaN(v)) return '--';
+  return Number(v).toFixed(d);
+}
+
+function buatLineChart(chartObj, canvasId, labels, values, color){
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if (chartObj) chartObj.destroy();
+  return new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ data: values, borderColor: color, backgroundColor: color + '22', borderWidth: 2.5, pointRadius: 0, tension: 0.35, fill: true }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { display: false },
+        y: { grid: { color: 'rgba(43,33,23,0.06)' }, ticks: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 9 } } }
+      }
+    }
+  });
+}
+
+function buatBarChart(chartObj, canvasId, labels, values, color){
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  if (chartObj) chartObj.destroy();
+  return new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 4, maxBarThickness: 22 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 8 } } },
+        y: { grid: { color: 'rgba(43,33,23,0.06)' }, ticks: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 9 } } }
+      }
+    }
+  });
+}
+
+function hitungHujanHarian(hist){
+  const byDate = {};
+  const order = [];
+  hist.forEach(h => {
+    if (!h.timestamp) return;
+    const tgl = tanggalSiklus(h.timestamp); // siklus 06:00-05:59, bukan tengah malam kalender
+    if (!(tgl in byDate)) { byDate[tgl] = { first: h.curah_hujan, last: h.curah_hujan }; order.push(tgl); }
+    byDate[tgl].last = h.curah_hujan;
+  });
+  const labels = [];
+  const values = [];
+  let prevLast = null;
+  order.forEach(tgl => {
+    const d = byDate[tgl];
+    const dailyRain = prevLast === null ? (d.last - d.first) : (d.last - prevLast);
+    labels.push(tgl);
+    values.push(Math.max(0, Number(dailyRain.toFixed(1))));
+    prevLast = d.last;
+  });
+  return { labels, values };
+}
+
+function renderAnalisaPembungaan(hist, harian){
+  const bulan = new Date().getMonth();
+  const dalamPeriodeBunga = (bulan >= 5 && bulan <= 8);
+
+  document.getElementById('badgePeriode').textContent = dalamPeriodeBunga ? 'Taksasi Bunga' : 'Di luar periode';
+  document.getElementById('badgePeriode').className = 'badge ' + (dalamPeriodeBunga ? 'wet' : 'dry');
+
+  let hariKering = 0;
+  for (let i = harian.values.length - 1; i >= 0; i--){
+    if (harian.values[i] < 1) hariKering++; else break;
+  }
+  document.getElementById('hariKering').textContent = harian.values.length ? (hariKering + ' hari') : '--';
+
+  const last7 = harian.values.slice(-7);
+  const total7 = last7.reduce((a,b) => a+b, 0);
+  document.getElementById('hujan7Hari').textContent = harian.values.length ? (total7.toFixed(1) + ' mm') : '--';
+
+  let eventTerdeteksi = null;
+  let keringBerjalan = 0;
+  for (let i = 0; i < harian.values.length; i++){
+    if (harian.values[i] < 1) {
+      keringBerjalan++;
+    } else {
+      if (keringBerjalan >= 5 && harian.values[i] >= 5) {
+        eventTerdeteksi = { tanggal: harian.labels[i], hujan: harian.values[i], hariKeringSebelum: keringBerjalan };
+      }
+      keringBerjalan = 0;
+    }
+  }
+
+  const fT = document.getElementById('fenomenaTitle');
+  const fB = document.getElementById('fenomenaBody');
+  const proy = document.getElementById('proyeksi');
+
+  if (harian.values.length < 5) {
+    fT.textContent = 'Mengumpulkan data...';
+    fB.textContent = 'Histori curah hujan masih terlalu pendek (' + harian.values.length + ' hari) untuk mendeteksi pola hujan pembuka. Analisa akan otomatis muncul begitu data terkumpul lebih lengkap.';
+    proy.textContent = '--';
+  } else if (eventTerdeteksi) {
+    fT.textContent = 'Hujan Pembuka Terdeteksi';
+    fB.textContent = 'Pada ' + eventTerdeteksi.tanggal + ', tercatat ' + eventTerdeteksi.hujan.toFixed(1) +
+      'mm hujan setelah ' + eventTerdeteksi.hariKeringSebelum + ' hari kering berturut-turut - pola ini konsisten dengan pemicu pembungaan kopi robusta.';
+    proy.textContent = '+7 s/d +10 hari dari ' + eventTerdeteksi.tanggal;
+  } else if (hariKering >= 5) {
+    fT.textContent = 'Masa Kering Berlangsung';
+    fB.textContent = 'Sudah ' + hariKering + ' hari tanpa hujan signifikan. Pantau terus - hujan pembuka (\u22655mm) dalam beberapa hari ke depan berpotensi memicu pembungaan.';
+    proy.textContent = 'Menunggu hujan pembuka';
+  } else {
+    fT.textContent = 'Kondisi Normal';
+    fB.textContent = 'Belum terdeteksi pola hujan pembuka yang jelas dalam data terkini. Curah hujan tersebar tanpa masa kering panjang sebelumnya.';
+    proy.textContent = '--';
+  }
+
+  chartFlowering = buatBarChart(chartFlowering, 'chartFlowering', harian.labels, harian.values, '#E85A2B');
+}
+
+// ============================================================
+// DATA HISTORIS 5 TAHUN - CH periode bunga (Jul-Okt) vs produksi
+// tahun berikutnya. Sumber: rekap produksi Kebun Gunung Gumitir
+// (CH bulanan 2020-2025, taksasi bunga & buah, realisasi produksi)
+// ============================================================
+const HISTORI_LABELS   = ["2019→20","2020→21","2021→22","2022→23","2023→24","2024→25","2025→26*"];
+const HISTORI_CH_BUNGA = [23, 865, 639, 963, 528, 687, 1052];       // mm, curah hujan Jul-Okt
+const HISTORI_PRODUKSI = [296725, 242848, 260500, 120789, 279456, 437837, 274727]; // kg
+
+function gambarChartHistori(){
+  const ctx = document.getElementById('chartHistori').getContext('2d');
+  new Chart(ctx, {
+    data: {
+      labels: HISTORI_LABELS,
+      datasets: [
+        {
+          type: 'bar',
+          label: 'CH Bunga (mm)',
+          data: HISTORI_CH_BUNGA,
+          backgroundColor: '#2E9CCA',
+          borderRadius: 4,
+          maxBarThickness: 24,
+          yAxisID: 'y'
+        },
+        {
+          type: 'line',
+          label: 'Produksi (kg)',
+          data: HISTORI_PRODUKSI,
+          borderColor: '#E85A2B',
+          backgroundColor: '#E85A2B',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#E85A2B',
+          tension: 0.3,
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 9 }, boxWidth: 10 } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 8.5 } } },
+        y: {
+          position: 'left',
+          title: { display: true, text: 'mm', color: '#8A7A63', font: { size: 9 } },
+          grid: { color: 'rgba(43,33,23,0.06)' },
+          ticks: { color: '#2E9CCA', font: { family: 'IBM Plex Mono', size: 8.5 } }
+        },
+        y1: {
+          position: 'right',
+          title: { display: true, text: 'kg', color: '#8A7A63', font: { size: 9 } },
+          grid: { display: false },
+          ticks: { color: '#E85A2B', font: { family: 'IBM Plex Mono', size: 8.5 } }
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// INISIALISASI
+// ============================================================
+updateDots();
+muatData();
+gambarChartHistori();
+setInterval(muatData, REFRESH_MS);
+</script>
+</body>
+</html>
