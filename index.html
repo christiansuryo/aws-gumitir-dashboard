@@ -598,7 +598,7 @@ const WIND_MAX_MS = 15;
 
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-const DASHBOARD_VERSION = "1.4";
+const DASHBOARD_VERSION = "1.5";
 
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
@@ -647,12 +647,15 @@ function hitungHujanSegmen(hist){
   ['pagi', 'siang', 'malam'].forEach(seg => {
     if (akhirSegmen[seg] !== null) {
       hasil[seg] = Math.max(0, Number((akhirSegmen[seg] - prev).toFixed(1)));
-      prev = akhirSegmen[seg];
+      prev = akhirSegmen[seg]; // tetap lanjut dari nilai mentah, meski sempat turun (reboot)
     } else {
       hasil[seg] = 0;
     }
   });
-  hasil.total = Math.max(0, Number((prev - base).toFixed(1)));
+  // Total dijumlah dari 3 segmen yang SUDAH dikunci minimal 0 masing-masing,
+  // bukan dihitung ulang (akhir-awal) - supaya tidak salah kalau counter
+  // sempat reset di tengah hari akibat ESP32 reboot
+  hasil.total = Math.max(0, Number((hasil.pagi + hasil.siang + hasil.malam).toFixed(1)));
   return hasil;
 }
 
