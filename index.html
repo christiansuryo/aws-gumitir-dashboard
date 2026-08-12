@@ -21,6 +21,7 @@
     --sky-light:#5CBADD;
     --night:#5B5FA0;
     --night-tint:#EEEEF9;
+    --danger:#C62828;
     --line:rgba(43,33,23,0.10);
     --shadow:0 2px 10px rgba(43,33,23,0.06);
   }
@@ -302,6 +303,21 @@
   }
   .badge.dry{background:rgba(232,90,43,0.12); color:var(--ember);}
   .badge.wet{background:rgba(46,156,202,0.14); color:var(--sky);}
+  .tier-badge{
+    display:inline-block;
+    margin-top:4px;
+    padding:2px 8px;
+    border-radius:20px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .tier-calm{background:rgba(138,122,99,0.12); color:var(--text-dim);}
+  .tier-light{background:rgba(46,156,202,0.14); color:var(--sky);}
+  .tier-moderate{background:rgba(240,169,62,0.18); color:#8A6D1E;}
+  .tier-strong{background:rgba(232,90,43,0.14); color:var(--ember);}
+  .tier-extreme{background:rgba(198,40,40,0.14); color:var(--danger);}
 
   /* ---------- Nav bawah ---------- */
   .nav{
@@ -438,7 +454,10 @@
       </div>
 
       <div class="rain-total">
-        <div class="rain-total-label">Kumulatif Hari Ini</div>
+        <div class="rain-total-label">
+          Kumulatif Hari Ini
+          <div><span class="tier-badge" id="rainTierBadge">--</span></div>
+        </div>
         <div class="rain-total-value"><span id="rainNow">--</span><small> mm</small></div>
       </div>
     </div>
@@ -458,6 +477,7 @@
         <div>
           <div class="card-label">Kec. Angin</div>
           <div class="card-value" style="font-size:22px"><span id="windSpeedNow">--</span><small> m/s</small></div>
+          <div><span class="tier-badge" id="windTierBadge">--</span></div>
         </div>
       </div>
 
@@ -598,7 +618,7 @@ const WIND_MAX_MS = 15;
 
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-const DASHBOARD_VERSION = "1.5";
+const DASHBOARD_VERSION = "1.6";
 
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
@@ -751,10 +771,16 @@ function renderSemua(data, dariServer){
   document.getElementById('altNow').textContent = fmt(L.ketinggian, 0);
 
   const segmen = hitungHujanSegmen(hist);
-  document.getElementById('rainNow').textContent = segmen.total !== null ? fmt(segmen.total, 1) : fmt(L.curah_hujan, 1);
+  const nilaiKumulatif = segmen.total !== null ? segmen.total : Number(L.curah_hujan);
+  document.getElementById('rainNow').textContent = fmt(nilaiKumulatif, 1);
   document.getElementById('rainPagi').textContent = segmen.pagi !== null ? fmt(segmen.pagi, 1) : '--';
   document.getElementById('rainSiang').textContent = segmen.siang !== null ? fmt(segmen.siang, 1) : '--';
   document.getElementById('rainMalam').textContent = segmen.malam !== null ? fmt(segmen.malam, 1) : '--';
+
+  const tierHujan = kategoriHujan(nilaiKumulatif);
+  const rainBadge = document.getElementById('rainTierBadge');
+  rainBadge.textContent = tierHujan.label;
+  rainBadge.className = 'tier-badge ' + tierHujan.tier;
 
   const windSpeed = Number(L.kecepatan_angin) || 0;
   document.getElementById('windSpeedNow').textContent = fmt(windSpeed, 1);
@@ -763,6 +789,11 @@ function renderSemua(data, dariServer){
   document.getElementById('speedoArc').style.strokeDashoffset = arcLen - (arcLen * windPct);
   const needleDeg = -90 + (windPct * 180);
   document.getElementById('needle').setAttribute('transform', 'rotate(' + needleDeg + ' 50 60)');
+
+  const tierAngin = kategoriAngin(windSpeed);
+  const windBadge = document.getElementById('windTierBadge');
+  windBadge.textContent = tierAngin.label;
+  windBadge.className = 'tier-badge ' + tierAngin.tier;
 
   document.getElementById('windDirNow').textContent = L.arah_kompas || '--';
   const deg = Number(L.arah_derajat) || 0;
@@ -794,6 +825,36 @@ function renderSemua(data, dariServer){
 function fmt(v, d){
   if (v === undefined || v === null || v === '' || isNaN(v)) return '--';
   return Number(v).toFixed(d);
+}
+
+// ============================================================
+// KATEGORI KECEPATAN ANGIN - adaptasi Skala Beaufort (m/s)
+// yang jadi acuan BMKG untuk peringatan angin
+// ============================================================
+function kategoriAngin(ms){
+  if (ms === undefined || ms === null || isNaN(ms)) return { label: '--', tier: 'tier-calm' };
+  if (ms < 0.3) return { label: 'Tenang', tier: 'tier-calm' };
+  if (ms < 1.6) return { label: 'Sangat Lemah', tier: 'tier-calm' };
+  if (ms < 3.4) return { label: 'Lemah', tier: 'tier-light' };
+  if (ms < 5.6) return { label: 'Sedang', tier: 'tier-moderate' };
+  if (ms < 8.1) return { label: 'Agak Kencang', tier: 'tier-moderate' };
+  if (ms < 10.9) return { label: 'Kencang', tier: 'tier-strong' };
+  if (ms < 13.9) return { label: 'Sangat Kencang', tier: 'tier-strong' };
+  return { label: 'Kuat / Berbahaya', tier: 'tier-extreme' };
+}
+
+// ============================================================
+// KATEGORI CURAH HUJAN - kriteria resmi BMKG (mm/24 jam)
+// diterapkan ke nilai "Kumulatif Hari Ini"
+// ============================================================
+function kategoriHujan(mm){
+  if (mm === undefined || mm === null || isNaN(mm)) return { label: '--', tier: 'tier-calm' };
+  if (mm <= 0) return { label: 'Tidak Ada Hujan', tier: 'tier-calm' };
+  if (mm < 5) return { label: 'Sangat Ringan', tier: 'tier-calm' };
+  if (mm < 20) return { label: 'Ringan', tier: 'tier-light' };
+  if (mm < 50) return { label: 'Sedang', tier: 'tier-moderate' };
+  if (mm < 100) return { label: 'Lebat', tier: 'tier-strong' };
+  return { label: 'Sangat Lebat', tier: 'tier-extreme' };
 }
 
 function buatLineChart(chartObj, canvasId, labels, values, color){
