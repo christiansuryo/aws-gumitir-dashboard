@@ -238,11 +238,12 @@
     align-items:center;
     gap:14px;
   }
-  .compass-widget{
+  .status-widget{
     display:flex;
-    align-items:center;
-    gap:14px;
+    flex-direction:column;
   }
+  .status-widget .metric-row{padding:6px 0;}
+  .status-widget .card-label{margin-bottom:6px;}
   .gauge-svg, .compass-svg{width:84px; height:84px; flex-shrink:0;}
   .widget-row{
     display:grid;
@@ -481,24 +482,25 @@
         </div>
       </div>
 
-      <div class="card compass-widget">
-        <div>
-          <svg class="compass-svg" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--surface-2)" stroke-width="1.4"/>
-            <text x="50" y="15" text-anchor="middle" fill="var(--text-dim)" font-family="IBM Plex Mono" font-size="9">U</text>
-            <text x="88" y="53" text-anchor="middle" fill="var(--text-dim)" font-family="IBM Plex Mono" font-size="9">T</text>
-            <text x="50" y="92" text-anchor="middle" fill="var(--text-dim)" font-family="IBM Plex Mono" font-size="9">S</text>
-            <text x="12" y="53" text-anchor="middle" fill="var(--text-dim)" font-family="IBM Plex Mono" font-size="9">B</text>
-            <g id="needleDir" transform="rotate(0 50 50)">
-              <polygon points="50,16 45,50 55,50" fill="var(--ember)"/>
-              <polygon points="50,84 45,50 55,50" fill="var(--surface-2)"/>
-            </g>
-            <circle cx="50" cy="50" r="4" fill="var(--gold)"/>
+      <div class="card status-widget">
+        <div class="card-label">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6">
+            <path d="M5 12.5a11 11 0 0 1 14 0M7.8 15.8a7 7 0 0 1 8.4 0M10.6 19a3 3 0 0 1 2.8 0" stroke-linecap="round"/>
+            <circle cx="12" cy="19.5" r="0.9" fill="var(--sky)" stroke="none"/>
           </svg>
+          Status Sistem
         </div>
-        <div>
-          <div class="card-label">Arah Angin</div>
-          <div class="card-value" style="font-size:17px" id="windDirNow">--</div>
+        <div class="metric-row">
+          <div class="k">Data terakhir</div>
+          <div class="v" id="statusWaktu" style="font-size:12px">--</div>
+        </div>
+        <div class="metric-row">
+          <div class="k">Kondisi</div>
+          <div class="v"><span class="tier-badge" id="statusBadge">--</span></div>
+        </div>
+        <div class="metric-row">
+          <div class="k">Firmware</div>
+          <div class="v" id="statusFirmware" style="font-size:11px">--</div>
         </div>
       </div>
     </div>
@@ -618,7 +620,7 @@ const WIND_MAX_MS = 15;
 
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-const DASHBOARD_VERSION = "1.6";
+const DASHBOARD_VERSION = "1.8";
 
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
@@ -795,9 +797,32 @@ function renderSemua(data, dariServer){
   windBadge.textContent = tierAngin.label;
   windBadge.className = 'tier-badge ' + tierAngin.tier;
 
-  document.getElementById('windDirNow').textContent = L.arah_kompas || '--';
-  const deg = Number(L.arah_derajat) || 0;
-  document.getElementById('needleDir').setAttribute('transform', 'rotate(' + deg + ' 50 50)');
+  // Arah angin (wind vane) dilepas dari sistem - lihat memori project
+
+  // ---------- Status Sistem ----------
+  if (L.timestamp) {
+    const waktuData = new Date(L.timestamp);
+    document.getElementById('statusWaktu').textContent =
+      waktuData.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) + ' ' +
+      waktuData.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+
+    const selisihMenit = (new Date() - waktuData) / 60000;
+    const statusBadge = document.getElementById('statusBadge');
+    if (selisihMenit < 20) {
+      statusBadge.textContent = 'Online';
+      statusBadge.className = 'tier-badge tier-light';
+    } else if (selisihMenit < 60) {
+      statusBadge.textContent = 'Terlambat';
+      statusBadge.className = 'tier-badge tier-moderate';
+    } else {
+      statusBadge.textContent = 'Offline';
+      statusBadge.className = 'tier-badge tier-extreme';
+    }
+  } else {
+    document.getElementById('statusWaktu').textContent = '--';
+    document.getElementById('statusBadge').textContent = '--';
+  }
+  document.getElementById('statusFirmware').textContent = L.sumber || (dariServer ? '--' : 'Data contoh');
 
   // ---------- PAGE 2: charts ----------
   const labels = hist.map(h => {
