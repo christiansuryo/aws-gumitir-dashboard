@@ -160,6 +160,26 @@
     font-family:'IBM Plex Sans',sans-serif;
     font-weight:400;
   }
+  .tren-tekanan{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    margin-top:6px;
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:10.5px;
+    color:var(--text-dim);
+  }
+  .tren-icon{
+    width:14px;
+    height:14px;
+    flex-shrink:0;
+    transition:transform 0.4s ease;
+  }
+  .tren-naik .tren-icon{stroke:var(--sky);}
+  .tren-turun .tren-icon{stroke:var(--ember);}
+  .tren-stabil .tren-icon{stroke:var(--text-dim);}
+  .tren-naik #trenLabel{color:var(--sky);}
+  .tren-turun #trenLabel{color:var(--ember);}
 
   /* ---------- Page 1: grid kartu ---------- */
   .grid-2{
@@ -406,6 +426,12 @@
           Tekanan
         </div>
         <div class="card-value"><span id="presNow">--</span><small> hPa</small></div>
+        <div class="tren-tekanan" id="trenTekanan">
+          <svg class="tren-icon" id="trenIcon" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2">
+            <path id="trenArrowPath" d="M12 19V5M12 5l-5 5M12 5l5 5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span id="trenLabel">--</span>
+        </div>
       </div>
       <div class="card">
         <div class="card-label">
@@ -620,7 +646,7 @@ const WIND_MAX_MS = 15;
 
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-const DASHBOARD_VERSION = "1.8";
+const DASHBOARD_VERSION = "1.11";
 
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
@@ -770,6 +796,7 @@ function renderSemua(data, dariServer){
   document.getElementById('tempNow').textContent = fmt(L.suhu, 1);
   document.getElementById('humNow').textContent = fmt(L.kelembaban, 0);
   document.getElementById('presNow').textContent = fmt(L.tekanan, 1);
+  renderTrenTekanan(hist, L);
   document.getElementById('altNow').textContent = fmt(L.ketinggian, 0);
 
   const segmen = hitungHujanSegmen(hist);
@@ -880,6 +907,60 @@ function kategoriHujan(mm){
   if (mm < 50) return { label: 'Sedang', tier: 'tier-moderate' };
   if (mm < 100) return { label: 'Lebat', tier: 'tier-strong' };
   return { label: 'Sangat Lebat', tier: 'tier-extreme' };
+}
+
+// ============================================================
+// TREN TEKANAN UDARA - bandingkan sekarang vs ~3 jam lalu, dipakai
+// sebagai prediksi kasar arah cuaca (prinsip barometer tradisional):
+// tekanan turun cepat -> cuaca memburuk/hujan mendekat
+// tekanan naik -> cuaca cerah berlanjut
+// ============================================================
+function renderTrenTekanan(hist, latest){
+  const wadah = document.getElementById('trenTekanan');
+  const label = document.getElementById('trenLabel');
+  const panah = document.getElementById('trenArrowPath');
+
+  if (!latest.timestamp || !hist.length) {
+    wadah.className = 'tren-tekanan';
+    label.textContent = '--';
+    return;
+  }
+
+  const waktuSekarang = new Date(latest.timestamp).getTime();
+  const targetWaktu = waktuSekarang - (3 * 60 * 60 * 1000); // 3 jam lalu
+
+  let terdekat = null, selisihTerkecil = Infinity;
+  hist.forEach(h => {
+    if (!h.timestamp || h.tekanan === undefined) return;
+    const t = new Date(h.timestamp).getTime();
+    const selisih = Math.abs(t - targetWaktu);
+    if (selisih < selisihTerkecil) { selisihTerkecil = selisih; terdekat = h; }
+  });
+
+  // Kalau titik terdekat yang ditemukan masih lebih dari 90 menit
+  // meleset dari target 3 jam, histori belum cukup panjang -> jangan
+  // tampilkan tren yang menyesatkan
+  if (!terdekat || selisihTerkecil > 90 * 60 * 1000) {
+    wadah.className = 'tren-tekanan';
+    label.textContent = 'Mengumpulkan data...';
+    return;
+  }
+
+  const delta = Number(latest.tekanan) - Number(terdekat.tekanan);
+
+  if (delta > 1.0) {
+    wadah.className = 'tren-tekanan tren-naik';
+    panah.setAttribute('d', 'M12 19V5M12 5l-5 5M12 5l5 5'); // panah ke atas
+    label.textContent = 'Naik - cuaca cerah berlanjut';
+  } else if (delta < -1.0) {
+    wadah.className = 'tren-tekanan tren-turun';
+    panah.setAttribute('d', 'M12 5v14M12 19l-5-5M12 19l5-5'); // panah ke bawah
+    label.textContent = 'Turun - waspada, hujan mendekat';
+  } else {
+    wadah.className = 'tren-tekanan tren-stabil';
+    panah.setAttribute('d', 'M5 12h14'); // garis datar
+    label.textContent = 'Stabil';
+  }
 }
 
 function buatLineChart(chartObj, canvasId, labels, values, color){
@@ -1071,6 +1152,11 @@ function gambarChartHistori(){
     }
   });
 }
+
+// ============================================================
+// Tombol reset curah hujan DIPINDAH ke menu kustom Google Sheets
+// (bukan lagi tombol publik di dashboard) - supaya cuma orang
+// dengan akses Editor spreadsheet yang bisa memicu reset.
 
 // ============================================================
 // INISIALISASI
