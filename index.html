@@ -181,6 +181,82 @@
   .tren-naik #trenLabel{color:var(--sky);}
   .tren-turun #trenLabel{color:var(--ember);}
 
+  /* ---------- Page 1: perbandingan 3 lokasi ---------- */
+  .station-legend{
+    display:flex;
+    gap:14px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .leg-item{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;
+    color:var(--text-dim);
+  }
+  .leg-dot{
+    width:7px; height:7px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .multi-card{margin-bottom:9px;}
+  .multi-row{
+    display:flex;
+    gap:7px;
+    margin-top:8px;
+  }
+  .multi-col{
+    flex:1;
+    text-align:center;
+    background:var(--surface-2);
+    border-radius:11px;
+    padding:9px 4px 8px;
+    min-width:0;
+  }
+  .multi-code{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px;
+    font-weight:600;
+    letter-spacing:0.06em;
+    margin-bottom:4px;
+  }
+  .multi-code.code-KI{color:var(--ember);}
+  .multi-code.code-TM{color:var(--gold);}
+  .multi-code.code-SS{color:var(--sky);}
+  .multi-val{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    font-weight:500;
+    line-height:1.1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .multi-val small{
+    font-size:9.5px;
+    font-family:'IBM Plex Sans',sans-serif;
+    color:var(--text-dim);
+    font-weight:400;
+  }
+  .multi-val.muted{
+    color:var(--text-dim);
+    opacity:0.45;
+    font-size:15px;
+  }
+  .multi-sub{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:8.5px;
+    color:var(--text-dim);
+    margin-top:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .multi-sub.tren-up{color:var(--sky);}
+  .multi-sub.tren-down{color:var(--ember);}
+
   /* ---------- Page 1: grid kartu ---------- */
   .grid-2{
     display:grid;
@@ -646,7 +722,7 @@ const WIND_MAX_MS = 15;
 
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-const DASHBOARD_VERSION = "1.12";
+const DASHBOARD_VERSION = "1.13";
 
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
@@ -760,7 +836,15 @@ function buatDataContoh(){
       sumber: "Contoh"
     });
   }
-  return { latest: history[history.length - 1], history: history };
+  // Data contoh untuk grafik harian (mensimulasikan Rekap Harian)
+  const harian = [];
+  for (let d = 13; d >= 0; d--){
+    const tgl = new Date(now.getTime() - d * 24 * 60 * 60000);
+    const hujan = Math.random() > 0.6 ? Number((Math.random() * 15).toFixed(1)) : 0;
+    harian.push({ tanggal: tgl.toISOString(), curah_hujan: hujan });
+  }
+
+  return { latest: history[history.length - 1], history: history, harian: harian };
 }
 const DATA_CONTOH = buatDataContoh();
 
@@ -769,15 +853,34 @@ const DATA_CONTOH = buatDataContoh();
 // ============================================================
 let chartSuhu, chartHum, chartPres, chartRainHarian, chartFlowering;
 
+// ============================================================
+// Ambil data dengan retry - percobaan pertama sering gagal kalau
+// browser baru "bangun" dari suspend (habis ditinggal ke app lain)
+// karena jaringan belum benar-benar siap. Coba beberapa kali dulu
+// sebelum benar-benar jatuh ke data contoh.
+// ============================================================
+async function fetchDenganRetry(url, percobaanMaks = 3){
+  for (let i = 0; i < percobaanMaks; i++){
+    try {
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      if (!data.latest) throw new Error("Belum ada data");
+      return data;
+    } catch (err) {
+      console.warn("Percobaan " + (i + 1) + "/" + percobaanMaks + " gagal:", err);
+      if (i < percobaanMaks - 1) {
+        await new Promise(r => setTimeout(r, 1000 * (i + 1))); // jeda makin lama tiap gagal
+      }
+    }
+  }
+  return null;
+}
+
 async function muatData(){
-  let data, dariServer = true;
-  try {
-    const res = await fetch(API_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    data = await res.json();
-    if (!data.latest) throw new Error("Belum ada data");
-  } catch (err) {
-    console.warn("Gagal ambil data asli, pakai contoh:", err);
+  let dariServer = true;
+  let data = await fetchDenganRetry(API_URL);
+  if (!data) {
     data = DATA_CONTOH;
     dariServer = false;
   }
@@ -824,8 +927,6 @@ function renderSemua(data, dariServer){
   windBadge.textContent = tierAngin.label;
   windBadge.className = 'tier-badge ' + tierAngin.tier;
 
-  // Arah angin (wind vane) dilepas dari sistem - lihat memori project
-
   // ---------- Status Sistem ----------
   if (L.timestamp) {
     const waktuData = new Date(L.timestamp);
@@ -862,7 +963,11 @@ function renderSemua(data, dariServer){
   chartHum  = buatLineChart(chartHum,  'chartHum',  labels, hist.map(h => h.kelembaban), '#2E9CCA');
   chartPres = buatLineChart(chartPres, 'chartPres', labels, hist.map(h => h.tekanan), '#F0A93E');
 
-  const harian = hitungHujanHarian(hist);
+  // Curah hujan harian sekarang bersumber dari tab "Rekap Harian"
+  // (dikirim server sebagai data.harian) - JAUH lebih reliable untuk
+  // rentang panjang dibanding hitung dari Data Mentah mentah (yang
+  // gampang mentok karena batas jumlah baris "history").
+  const harian = harianDariServer(data.harian || []);
   chartRainHarian = buatBarChart(chartRainHarian, 'chartRainHarian', harian.labels, harian.values, '#2E9CCA');
 
   if (harian.labels.length < 3) {
@@ -872,6 +977,24 @@ function renderSemua(data, dariServer){
 
   // ---------- PAGE 3 ----------
   renderAnalisaPembungaan(hist, harian);
+}
+
+// ============================================================
+// Konversi data.harian (array {tanggal, curah_hujan} dari tab
+// Rekap Harian) ke format {labels, values} yang dipakai chart &
+// analisa pembungaan - menggantikan hitungHujanHarian(hist) lama
+// yang keterbatasannya cuma bisa lihat sejauh batas "history".
+// ============================================================
+function harianDariServer(dataHarian){
+  const labels = dataHarian.map(h => {
+    const d = new Date(h.tanggal);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'});
+    }
+    return String(h.tanggal);
+  });
+  const values = dataHarian.map(h => Math.max(0, Number(h.curah_hujan) || 0));
+  return { labels, values };
 }
 
 function fmt(v, d){
@@ -919,13 +1042,7 @@ function kategoriHujan(mm){
 // TREN TEKANAN UDARA - bandingkan sekarang vs ~3 jam lalu.
 // SENGAJA tidak diberi klaim prediksi hujan ("waspada" dsb) -
 // belum ada ambang batas baku BMKG untuk konteks tropis/lokal
-// seperti Gumitir (aturan umum "1-3 hPa/3jam" itu berasal dari
-// kebiasaan wilayah lintang tengah dengan sistem frontal, beda
-// mekanisme dengan hujan konvektif tropis + pasang-surut atmosfer
-// harian di khatulistiwa). Untuk sekarang cuma tampilkan FAKTA
-// arah & besaran perubahan - ambang batas prediksi baru akan
-// dikalibrasi nanti dari data historis Gumitir sendiri setelah
-// terkumpul cukup lama (idealnya 1 musim/tahun penuh).
+// seperti Gumitir. Cuma tampilkan FAKTA arah & besaran perubahan.
 // ============================================================
 function renderTrenTekanan(hist, latest){
   const wadah = document.getElementById('trenTekanan');
@@ -939,7 +1056,7 @@ function renderTrenTekanan(hist, latest){
   }
 
   const waktuSekarang = new Date(latest.timestamp).getTime();
-  const targetWaktu = waktuSekarang - (3 * 60 * 60 * 1000); // 3 jam lalu
+  const targetWaktu = waktuSekarang - (3 * 60 * 60 * 1000);
 
   let terdekat = null, selisihTerkecil = Infinity;
   hist.forEach(h => {
@@ -949,9 +1066,6 @@ function renderTrenTekanan(hist, latest){
     if (selisih < selisihTerkecil) { selisihTerkecil = selisih; terdekat = h; }
   });
 
-  // Kalau titik terdekat yang ditemukan masih lebih dari 90 menit
-  // meleset dari target 3 jam, histori belum cukup panjang -> jangan
-  // tampilkan tren yang menyesatkan
   if (!terdekat || selisihTerkecil > 90 * 60 * 1000) {
     wadah.className = 'tren-tekanan';
     label.textContent = 'Mengumpulkan data...';
@@ -963,15 +1077,15 @@ function renderTrenTekanan(hist, latest){
 
   if (delta > 0.3) {
     wadah.className = 'tren-tekanan tren-naik';
-    panah.setAttribute('d', 'M12 19V5M12 5l-5 5M12 5l5 5'); // panah ke atas
+    panah.setAttribute('d', 'M12 19V5M12 5l-5 5M12 5l5 5');
     label.textContent = 'Naik ' + deltaAbs + ' hPa (3 jam terakhir)';
   } else if (delta < -0.3) {
     wadah.className = 'tren-tekanan tren-turun';
-    panah.setAttribute('d', 'M12 5v14M12 19l-5-5M12 19l5-5'); // panah ke bawah
+    panah.setAttribute('d', 'M12 5v14M12 19l-5-5M12 19l5-5');
     label.textContent = 'Turun ' + deltaAbs + ' hPa (3 jam terakhir)';
   } else {
     wadah.className = 'tren-tekanan tren-stabil';
-    panah.setAttribute('d', 'M5 12h14'); // garis datar
+    panah.setAttribute('d', 'M5 12h14');
     label.textContent = 'Stabil (Δ' + delta.toFixed(1) + ' hPa)';
   }
 }
@@ -1178,6 +1292,15 @@ updateDots();
 muatData();
 gambarChartHistori();
 setInterval(muatData, REFRESH_MS);
+
+// Begitu tab/app aktif kembali (habis ditinggal ke app lain lalu
+// dibuka lagi), langsung tarik data baru - tidak nunggu siklus
+// setInterval berikutnya yang bisa sampai 1 menit lagi
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    muatData();
+  }
+});
 </script>
 </body>
 </html>
