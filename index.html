@@ -104,7 +104,7 @@
     70%{box-shadow:0 0 0 7px rgba(232,90,43,0);}
     100%{box-shadow:0 0 0 0 rgba(232,90,43,0);}
   }
-  /* ---------- Saklar stasiun ---------- */
+  /* ---------- Saklar mode (AWS Kebun / per-stasiun) ---------- */
   .station-switch{
     display:flex;
     gap:6px;
@@ -128,6 +128,7 @@
     transition:background 0.2s, color 0.2s, border-color 0.2s;
   }
   .station-pill .p-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .station-pill.code-KEBUN .p-dot{background:var(--text);}
   .station-pill.code-KI .p-dot{background:var(--ember);}
   .station-pill.code-TM .p-dot{background:var(--gold);}
   .station-pill.code-SS .p-dot{background:var(--sky);}
@@ -216,85 +217,6 @@
   .tren-stabil .tren-icon{stroke:var(--text-dim);}
   .tren-naik #trenLabel{color:var(--sky);}
   .tren-turun #trenLabel{color:var(--ember);}
-  /* ---------- Kartu perbandingan antar stasiun ---------- */
-  .station-legend{
-    display:flex;
-    gap:14px;
-    margin-bottom:10px;
-    flex-wrap:wrap;
-  }
-  .leg-item{
-    display:flex;
-    align-items:center;
-    gap:5px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:9.5px;
-    color:var(--text-dim);
-  }
-  .leg-dot{
-    width:7px; height:7px;
-    border-radius:50%;
-    flex-shrink:0;
-  }
-  .multi-card{margin-bottom:9px;}
-  .multi-row{
-    display:flex;
-    gap:7px;
-    margin-top:8px;
-  }
-  .multi-col{
-    flex:1;
-    text-align:center;
-    background:var(--surface-2);
-    border-radius:11px;
-    padding:9px 4px 8px;
-    min-width:0;
-    cursor:pointer;
-    border:1.5px solid transparent;
-    transition:border-color 0.2s;
-  }
-  .multi-col.aktif{border-color:var(--text);}
-  .multi-code{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:9px;
-    font-weight:600;
-    letter-spacing:0.06em;
-    margin-bottom:4px;
-  }
-  .multi-code.code-KI{color:var(--ember);}
-  .multi-code.code-TM{color:var(--gold);}
-  .multi-code.code-SS{color:var(--sky);}
-  .multi-val{
-    font-family:'Fraunces',serif;
-    font-size:19px;
-    font-weight:500;
-    line-height:1.1;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .multi-val small{
-    font-size:9.5px;
-    font-family:'IBM Plex Sans',sans-serif;
-    color:var(--text-dim);
-    font-weight:400;
-  }
-  .multi-val.muted{
-    color:var(--text-dim);
-    opacity:0.45;
-    font-size:15px;
-  }
-  .multi-sub{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:8.5px;
-    color:var(--text-dim);
-    margin-top:3px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .multi-sub.tren-up{color:var(--sky);}
-  .multi-sub.tren-down{color:var(--ember);}
   /* ---------- Page 1: grid kartu ---------- */
   .grid-2{
     display:grid;
@@ -491,12 +413,69 @@
     .card-value{font-size:24px;}
     .gauge-svg, .compass-svg{width:72px; height:72px;}
   }
+  /* ---------- Mode "AWS Kebun": nilai dua-stasiun berdampingan ---------- */
+  [hidden]{display:none !important;}
+  .duo{display:flex; gap:10px;}
+  .duo.full{flex:1; width:100%;}
+  .duo-item{flex:1; min-width:0;}
+  .duo-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:8.5px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:2px;
+  }
+  .duo-tag.code-KI{color:var(--ember);}
+  .duo-tag.code-TM{color:var(--gold);}
+  .duo-val{
+    display:block;
+    font-family:'Fraunces',serif;
+    font-size:20px;
+    font-weight:500;
+    line-height:1.15;
+    white-space:nowrap;
+  }
+  .duo-val small{
+    font-size:11px;
+    font-family:'IBM Plex Sans',sans-serif;
+    color:var(--text-dim);
+    font-weight:400;
+  }
+  .duo-sub{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9px;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+  .duo-sub.tren-naik{color:var(--sky);}
+  .duo-sub.tren-turun{color:var(--ember);}
+  .duo-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    font-weight:500;
+  }
+  .tier-badge.sm{font-size:8px; padding:1.5px 6px; margin-top:3px;}
+  .rseg-duo{margin-top:2px; gap:6px;}
+  .rseg-duo .duo-val{font-size:13px;}
+  .status-duo{gap:10px; max-width:62%;}
+  .status-duo .duo-item{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    text-align:right;
+  }
+  .insight-card .duo-tag{margin-bottom:4px;}
 </style>
 </head>
 <body>
 <div class="topbar">
   <div>
-    <div class="eyebrow">Automatic Weather Station <span class="verbadge" id="versionBadge">v2.0</span></div>
+    <div class="eyebrow">Automatic Weather Station <span class="verbadge" id="versionBadge">v3.0</span></div>
     <div class="wordmark">Kebun Gunung <span>Gumitir</span></div>
   </div>
   <div class="status-block">
@@ -508,46 +487,70 @@
   </div>
 </div>
 <div class="station-switch" id="stationSwitch">
-  <!-- diisi JS dari array STATIONS -->
+  <!-- diisi JS dari array MODES -->
 </div>
 <div class="pager" id="pager">
   <!-- PAGE 1: RINGKASAN LENGKAP -->
   <div class="page" id="page-0">
     <div class="page-title">Ringkasan Kondisi Saat Ini</div>
-    <div class="card multi-card">
-      <div class="card-label">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.6"><path d="M9 20l-5-5 5-5M4 15h16M15 4l5 5-5 5M20 9H4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Perbandingan Antar Stasiun
-      </div>
-      <div class="station-legend" id="stationLegend"><!-- diisi JS --></div>
-      <div class="multi-row" id="multiSuhu"><!-- diisi JS --></div>
-    </div>
     <div class="grid-2">
       <div class="card">
         <div class="card-label">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.6"><path d="M12 3a2 2 0 0 0-2 2v9.17a3.5 3.5 0 1 0 4 0V5a2 2 0 0 0-2-2z"/><path d="M12 8v6"/></svg>
           Suhu
         </div>
-        <div class="card-value"><span id="tempNow">--</span><small> °C</small></div>
+        <div class="card-value single-only" hidden><span id="tempNow">--</span><small> °C</small></div>
+        <div class="duo duo-only">
+          <div class="duo-item">
+            <span class="duo-tag code-KI">Kantin</span>
+            <span class="duo-val"><span id="tempNow-KI">--</span><small> °C</small></span>
+          </div>
+          <div class="duo-item">
+            <span class="duo-tag code-TM">Tama</span>
+            <span class="duo-val"><span id="tempNow-TM">--</span><small> °C</small></span>
+          </div>
+        </div>
       </div>
       <div class="card">
         <div class="card-label">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6"><path d="M12 3s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg>
           Kelembaban
         </div>
-        <div class="card-value"><span id="humNow">--</span><small> %</small></div>
+        <div class="card-value single-only" hidden><span id="humNow">--</span><small> %</small></div>
+        <div class="duo duo-only">
+          <div class="duo-item">
+            <span class="duo-tag code-KI">Kantin</span>
+            <span class="duo-val"><span id="humNow-KI">--</span><small> %</small></span>
+          </div>
+          <div class="duo-item">
+            <span class="duo-tag code-TM">Tama</span>
+            <span class="duo-val"><span id="humNow-TM">--</span><small> %</small></span>
+          </div>
+        </div>
       </div>
       <div class="card">
         <div class="card-label">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
           Tekanan
         </div>
-        <div class="card-value"><span id="presNow">--</span><small> hPa</small></div>
-        <div class="tren-tekanan" id="trenTekanan">
+        <div class="card-value single-only" hidden><span id="presNow">--</span><small> hPa</small></div>
+        <div class="tren-tekanan single-only" id="trenTekanan" hidden>
           <svg class="tren-icon" id="trenIcon" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2">
             <path id="trenArrowPath" d="M12 19V5M12 5l-5 5M12 5l5 5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span id="trenLabel">--</span>
+        </div>
+        <div class="duo duo-only">
+          <div class="duo-item">
+            <span class="duo-tag code-KI">Kantin</span>
+            <span class="duo-val"><span id="presNow-KI">--</span><small> hPa</small></span>
+            <span class="duo-sub" id="trenSub-KI">--</span>
+          </div>
+          <div class="duo-item">
+            <span class="duo-tag code-TM">Tama</span>
+            <span class="duo-val"><span id="presNow-TM">--</span><small> hPa</small></span>
+            <span class="duo-sub" id="trenSub-TM">--</span>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -555,7 +558,17 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.6"><path d="M3 20l6-11 4 6 3-5 5 10z"/></svg>
           Ketinggian
         </div>
-        <div class="card-value"><span id="altNow">--</span><small> mdpl</small></div>
+        <div class="card-value single-only" hidden><span id="altNow">--</span><small> mdpl</small></div>
+        <div class="duo duo-only">
+          <div class="duo-item">
+            <span class="duo-tag code-KI">Kantin</span>
+            <span class="duo-val"><span id="altNow-KI">--</span><small> mdpl</small></span>
+          </div>
+          <div class="duo-item">
+            <span class="duo-tag code-TM">Tama</span>
+            <span class="duo-val"><span id="altNow-TM">--</span><small> mdpl</small></span>
+          </div>
+        </div>
       </div>
     </div>
     <div class="card" style="margin-bottom:9px; padding:14px 16px;">
@@ -574,7 +587,11 @@
             <path d="M3 15h18" stroke-linecap="round"/>
           </svg>
           <div class="rseg-label">Pagi</div>
-          <div class="rseg-value"><span id="rainPagi">--</span> <small>mm</small></div>
+          <div class="rseg-value single-only" hidden><span id="rainPagi">--</span> <small>mm</small></div>
+          <div class="duo duo-only rseg-duo">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainPagi-KI">--</span><small> mm</small></span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainPagi-TM">--</span><small> mm</small></span></div>
+          </div>
         </div>
         <div class="rseg rseg-siang">
           <svg class="rseg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.7">
@@ -582,27 +599,47 @@
             <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke-linecap="round"/>
           </svg>
           <div class="rseg-label">Siang</div>
-          <div class="rseg-value"><span id="rainSiang">--</span> <small>mm</small></div>
+          <div class="rseg-value single-only" hidden><span id="rainSiang">--</span> <small>mm</small></div>
+          <div class="duo duo-only rseg-duo">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainSiang-KI">--</span><small> mm</small></span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainSiang-TM">--</span><small> mm</small></span></div>
+          </div>
         </div>
         <div class="rseg rseg-malam">
           <svg class="rseg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--night)" stroke-width="1.7">
             <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/>
           </svg>
           <div class="rseg-label">Malam</div>
-          <div class="rseg-value"><span id="rainMalam">--</span> <small>mm</small></div>
+          <div class="rseg-value single-only" hidden><span id="rainMalam">--</span> <small>mm</small></div>
+          <div class="duo duo-only rseg-duo">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainMalam-KI">--</span><small> mm</small></span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainMalam-TM">--</span><small> mm</small></span></div>
+          </div>
         </div>
       </div>
       <div class="rain-total">
-        <div class="rain-total-label">
+        <div class="rain-total-label single-only" hidden>
           Kumulatif Hari Ini
           <div><span class="tier-badge" id="rainTierBadge">--</span></div>
         </div>
-        <div class="rain-total-value"><span id="rainNow">--</span><small> mm</small></div>
+        <div class="rain-total-value single-only" hidden><span id="rainNow">--</span><small> mm</small></div>
+        <div class="duo duo-only full">
+          <div class="duo-item">
+            <span class="duo-tag code-KI">Kantin</span>
+            <span class="duo-val"><span id="rainNow-KI">--</span><small> mm</small></span>
+            <span class="tier-badge sm" id="rainTierBadge-KI">--</span>
+          </div>
+          <div class="duo-item">
+            <span class="duo-tag code-TM">Tama</span>
+            <span class="duo-val"><span id="rainNow-TM">--</span><small> mm</small></span>
+            <span class="tier-badge sm" id="rainTierBadge-TM">--</span>
+          </div>
+        </div>
       </div>
     </div>
     <div class="widget-row">
       <div class="card speedo-widget">
-        <div>
+        <div class="single-only" hidden>
           <svg class="gauge-svg" viewBox="0 0 100 70">
             <path d="M10 60 A40 40 0 0 1 90 60" fill="none" stroke="var(--surface-2)" stroke-width="7" stroke-linecap="round"/>
             <path id="speedoArc" d="M10 60 A40 40 0 0 1 90 60" fill="none" stroke="var(--ember)" stroke-width="7" stroke-linecap="round" stroke-dasharray="126" stroke-dashoffset="126"/>
@@ -612,10 +649,22 @@
             <circle cx="50" cy="60" r="4" fill="var(--gold)"/>
           </svg>
         </div>
-        <div>
+        <div class="single-only" hidden>
           <div class="card-label">Kec. Angin</div>
           <div class="card-value" style="font-size:22px"><span id="windSpeedNow">--</span><small> m/s</small></div>
           <div><span class="tier-badge" id="windTierBadge">--</span></div>
+        </div>
+        <div class="duo duo-only full">
+          <div class="duo-item">
+            <div class="card-label"><span class="duo-tag code-KI">Kantin</span></div>
+            <div class="duo-val"><span id="windSpeedNow-KI">--</span><small> m/s</small></div>
+            <span class="tier-badge sm" id="windTierBadge-KI">--</span>
+          </div>
+          <div class="duo-item">
+            <div class="card-label"><span class="duo-tag code-TM">Tama</span></div>
+            <div class="duo-val"><span id="windSpeedNow-TM">--</span><small> m/s</small></div>
+            <span class="tier-badge sm" id="windTierBadge-TM">--</span>
+          </div>
         </div>
       </div>
       <div class="card status-widget">
@@ -628,15 +677,27 @@
         </div>
         <div class="metric-row">
           <div class="k">Data terakhir</div>
-          <div class="v" id="statusWaktu" style="font-size:12px">--</div>
+          <div class="v single-only" id="statusWaktu" style="font-size:12px" hidden>--</div>
+          <div class="duo duo-only status-duo">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="statusWaktu-KI">--</span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="statusWaktu-TM">--</span></div>
+          </div>
         </div>
         <div class="metric-row">
           <div class="k">Kondisi</div>
-          <div class="v"><span class="tier-badge" id="statusBadge">--</span></div>
+          <div class="v single-only" hidden><span class="tier-badge" id="statusBadge">--</span></div>
+          <div class="duo duo-only status-duo">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="tier-badge sm" id="statusBadge-KI">--</span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="tier-badge sm" id="statusBadge-TM">--</span></div>
+          </div>
         </div>
         <div class="metric-row">
           <div class="k">Firmware</div>
-          <div class="v" id="statusFirmware" style="font-size:11px">--</div>
+          <div class="v single-only" id="statusFirmware" style="font-size:11px" hidden>--</div>
+          <div class="duo duo-only status-duo">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="statusFirmware-KI" style="font-size:9.5px">--</span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="statusFirmware-TM" style="font-size:9.5px">--</span></div>
+          </div>
         </div>
       </div>
     </div>
@@ -665,18 +726,34 @@
   <!-- PAGE 3: ANALISA PEMBUNGAAN -->
   <div class="page" id="page-2">
     <div class="page-title">Analisa &amp; Forecast Pembungaan</div>
-    <div class="card insight-card">
+    <div class="card insight-card single-only" hidden>
       <div class="insight-title" id="fenomenaTitle">Mendeteksi pola...</div>
       <div class="insight-body" id="fenomenaBody">Menganalisa data curah hujan untuk mendeteksi "hujan pembuka" (rain trigger).</div>
+    </div>
+    <div class="card insight-card duo-only">
+      <div class="insight-title"><span class="duo-tag code-KI">Kantin</span></div>
+      <div class="insight-body" id="fenomenaBody-KI">Menganalisa data curah hujan Kantor Induk...</div>
+    </div>
+    <div class="card insight-card duo-only">
+      <div class="insight-title"><span class="duo-tag code-TM">Tama</span></div>
+      <div class="insight-body" id="fenomenaBody-TM">Menganalisa data curah hujan Tanah Manis...</div>
     </div>
     <div class="card" style="margin-bottom:9px;">
       <div class="metric-row">
         <div class="k">Hari kering berturut-turut</div>
-        <div class="v" id="hariKering">--</div>
+        <div class="v single-only" id="hariKering" hidden>--</div>
+        <div class="duo duo-only status-duo">
+          <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="hariKering-KI">--</span></div>
+          <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="hariKering-TM">--</span></div>
+        </div>
       </div>
       <div class="metric-row">
         <div class="k">Curah hujan 7 hari terakhir</div>
-        <div class="v" id="hujan7Hari">--</div>
+        <div class="v single-only" id="hujan7Hari" hidden>--</div>
+        <div class="duo duo-only status-duo">
+          <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="hujan7Hari-KI">--</span></div>
+          <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="hujan7Hari-TM">--</span></div>
+        </div>
       </div>
       <div class="metric-row">
         <div class="k">Status periode saat ini</div>
@@ -684,7 +761,11 @@
       </div>
       <div class="metric-row">
         <div class="k">Proyeksi jendela pembungaan</div>
-        <div class="v" id="proyeksi">--</div>
+        <div class="v single-only" id="proyeksi" hidden>--</div>
+        <div class="duo duo-only status-duo">
+          <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="proyeksi-KI" style="font-size:9px;">--</span></div>
+          <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="proyeksi-TM" style="font-size:9px;">--</span></div>
+        </div>
       </div>
     </div>
     <div class="card chart-card">
@@ -773,61 +854,77 @@ const REFRESH_MS = 60000;
 const WIND_MAX_MS = 15;
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-// v2.1 - Menyesuaikan KEBIJAKAN PTPN I Reg 5 yang baru (sama dengan
-//        perubahan di firmware Gumitir v1.21 & Tanah Manis v1.1):
-//        tanggalSiklus() sekarang PERSIS mengikuti tanggal kalender
-//        (00:00), tidak lagi geser ke jam 06:00; segmenWaktu()
-//        diklasifikasi ulang: Pagi 00:00-07:59, Siang 08:00-15:59,
-//        Malam 16:00-23:59 (sebelumnya Pagi 06-10:59, Siang 11-16:59,
-//        Malam 17:00-05:59). TIDAK ADA perubahan lain.
-const DASHBOARD_VERSION = "2.1";
+// v3.0 - Mode tampilan baru "AWS Kebun": saklar di atas sekarang ada
+//        3 pilihan (AWS Kebun / Kantor Induk / Tanah Manis). Saat
+//        "AWS Kebun" dipilih (default saat dashboard dibuka), SETIAP
+//        card (Suhu, Kelembaban, Tekanan, Ketinggian, Curah Hujan
+//        Pagi/Siang/Malam/Total, Kec. Angin, Status Sistem, dan
+//        ringkasan di halaman Analisa) menampilkan nilai KEDUA
+//        stasiun berdampingan dengan label singkat "Kantin" (Kantor
+//        Induk) & "Tama" (Tanah Manis). Grafik Tren (halaman 2) &
+//        grafik CH periode bunga (halaman 3) menampilkan 2 garis/bar
+//        (Kantin vs Tama) sekaligus saat mode Kebun aktif. Card lama
+//        "Perbandingan Antar Stasiun" di paling atas dihapus karena
+//        sudah redundan - setiap card kini otomatis jadi
+//        perbandingan. Memilih "Kantor Induk" atau "Tanah Manis"
+//        mengembalikan tampilan single-station seperti v2.x.
+//        TIDAK ADA perubahan pada logika siklus 00:00/pagi-siang-malam
+//        dari v2.1 - murni penambahan mode tampilan.
+const DASHBOARD_VERSION = "3.0";
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
   new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-let stasiunAktif = STATIONS.find(s => s.active).code;
+// 'KEBUN' = mode gabungan (default), atau kode stasiun ('KI'/'TM')
+// untuk tampilan single-station seperti sebelumnya.
+let viewMode = 'KEBUN';
 const cacheData = {}; // { KI: {data,...}, TM: {...} } - hasil fetch terakhir per stasiun
 
 // ============================================================
-// SAKLAR STASIUN (pills)
+// SAKLAR MODE TAMPILAN (pills): "AWS Kebun" (gabungan) + tiap stasiun
 // ============================================================
-function bangunSaklarStasiun(){
+const MODES = [{ code: 'KEBUN', label: 'AWS Kebun' }]
+  .concat(STATIONS.filter(s => s.active).map(s => ({ code: s.code, label: s.name })));
+
+function bangunSaklarMode(){
   const wadah = document.getElementById('stationSwitch');
   wadah.innerHTML = '';
-  STATIONS.filter(s => s.active).forEach(s => {
+  MODES.forEach(m => {
     const pill = document.createElement('div');
-    pill.className = 'station-pill code-' + s.code + (s.code === stasiunAktif ? ' active' : '');
-    pill.dataset.kode = s.code;
-    pill.innerHTML = '<span class="p-dot"></span>' + s.name;
-    pill.addEventListener('click', () => pilihStasiun(s.code));
+    pill.className = 'station-pill code-' + m.code + (m.code === viewMode ? ' active' : '');
+    pill.dataset.kode = m.code;
+    pill.innerHTML = '<span class="p-dot"></span>' + m.label;
+    pill.addEventListener('click', () => pilihMode(m.code));
     wadah.appendChild(pill);
   });
 }
-function pilihStasiun(kode){
-  if (kode === stasiunAktif) return;
-  stasiunAktif = kode;
+function pilihMode(kode){
+  if (kode === viewMode) return;
+  viewMode = kode;
   document.querySelectorAll('.station-pill').forEach(p => {
     p.classList.toggle('active', p.dataset.kode === kode);
   });
-  document.querySelectorAll('.multi-col').forEach(c => {
-    c.classList.toggle('aktif', c.dataset.kode === kode);
-  });
   // Render ulang dari cache - tidak perlu fetch ulang, langsung instan
-  if (cacheData[kode] && cacheData[kode].data) {
-    renderSemua(cacheData[kode].data, cacheData[kode].dariServer);
-  } else {
-    kosongkanTampilanDetail();
-  }
-}
-function kosongkanTampilanDetail(){
-  document.getElementById('lastUpdate').textContent = 'menunggu data ' + namaStasiun(stasiunAktif) + '...';
-  ['tempNow','humNow','presNow','altNow','rainNow','rainPagi','rainSiang','rainMalam','windSpeedNow'].forEach(id => {
-    document.getElementById(id).textContent = '--';
-  });
+  renderDashboard();
 }
 function namaStasiun(kode){
   const s = STATIONS.find(x => x.code === kode);
   return s ? s.name : kode;
+}
+// Tampilkan blok single-station atau blok dua-stasiun (duo) sesuai
+// mode aktif. [hidden] di-set eksplisit display:none!important di
+// CSS supaya konsisten walau elemennya flex/grid.
+function toggleModeSections(){
+  const isKebun = (viewMode === 'KEBUN');
+  document.querySelectorAll('.single-only').forEach(el => { el.hidden = isKebun; });
+  document.querySelectorAll('.duo-only').forEach(el => { el.hidden = !isKebun; });
+}
+function kosongkanTampilanDetail(){
+  document.getElementById('lastUpdate').textContent = 'menunggu data ' + namaStasiun(viewMode) + '...';
+  ['tempNow','humNow','presNow','altNow','rainNow','rainPagi','rainSiang','rainMalam','windSpeedNow'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '--';
+  });
 }
 // ============================================================
 // TANGGAL SIKLUS CURAH HUJAN (KEBIJAKAN PTPN I REG 5 BARU, sama
@@ -961,8 +1058,8 @@ async function fetchDenganRetry(url, percobaanMaks = 3){
   return null;
 }
 // Ambil data SEMUA stasiun aktif secara paralel tiap siklus refresh -
-// supaya kartu perbandingan selalu terisi walau kamu sedang melihat
-// detail salah satu stasiun saja
+// perlu untuk mode "AWS Kebun" (nampilin 2 stasiun sekaligus di tiap
+// card) maupun supaya ganti mode instan dari cache tanpa fetch ulang.
 async function muatData(){
   const stasiunAktifList = STATIONS.filter(s => s.active);
   await Promise.all(stasiunAktifList.map(async (s) => {
@@ -978,66 +1075,55 @@ async function muatData(){
       }
     }
   }));
-
-  renderPerbandingan();
-  if (cacheData[stasiunAktif] && cacheData[stasiunAktif].data) {
-    renderSemua(cacheData[stasiunAktif].data, cacheData[stasiunAktif].dariServer);
+  renderDashboard();
+}
+// ============================================================
+// ROUTER RENDER - pilih render single-station atau dua-stasiun
+// (mode "AWS Kebun") sesuai viewMode aktif
+// ============================================================
+function renderDashboard(){
+  toggleModeSections();
+  if (viewMode === 'KEBUN') {
+    document.getElementById('lastUpdate').textContent =
+      'AWS Kebun · update ' + new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+    renderRingkasanDuo();
+    renderTrenDuo();
+    renderAnalisaDuo();
   } else {
-    kosongkanTampilanDetail();
-  }
-}
-// ============================================================
-// KARTU PERBANDINGAN ANTAR STASIUN (Page 1, paling atas)
-// ============================================================
-function renderPerbandingan(){
-  const legenda = document.getElementById('stationLegend');
-  const baris = document.getElementById('multiSuhu');
-  legenda.innerHTML = '';
-  baris.innerHTML = '';
-
-  STATIONS.filter(s => s.active).forEach(s => {
-    const leg = document.createElement('div');
-    leg.className = 'leg-item';
-    leg.innerHTML = '<span class="leg-dot code-' + s.code + '-dot" style="background:' +
-      (s.code === 'KI' ? 'var(--ember)' : s.code === 'TM' ? 'var(--gold)' : 'var(--sky)') +
-      '"></span>' + s.name;
-    legenda.appendChild(leg);
-
-    const entri = cacheData[s.code];
-    const col = document.createElement('div');
-    col.className = 'multi-col' + (s.code === stasiunAktif ? ' aktif' : '');
-    col.dataset.kode = s.code;
-    col.addEventListener('click', () => pilihStasiun(s.code));
-
-    if (entri && entri.data && entri.data.latest) {
-      const L = entri.data.latest;
-      const segmen = hitungHujanSegmen(entri.data.history || []);
-      const rainVal = segmen.total !== null ? segmen.total : Number(L.curah_hujan) || 0;
-      col.innerHTML =
-        '<div class="multi-code code-' + s.code + '">' + s.code + '</div>' +
-        '<div class="multi-val">' + fmt(L.suhu, 1) + '<small>°C</small></div>' +
-        '<div class="multi-sub">' + fmt(L.kelembaban, 0) + '% &middot; ' + fmt(rainVal, 1) + 'mm hujan</div>';
+    const entri = cacheData[viewMode];
+    if (entri && entri.data) {
+      renderRingkasanSingle(entri.data, entri.dariServer);
+      renderTrenSingle(entri.data);
+      renderAnalisaSingle(entri.data);
     } else {
-      col.innerHTML =
-        '<div class="multi-code code-' + s.code + '">' + s.code + '</div>' +
-        '<div class="multi-val muted">--</div>' +
-        '<div class="multi-sub">belum ada data</div>';
+      kosongkanTampilanDetail();
     }
-    baris.appendChild(col);
-  });
+  }
+  toggleHistori5Tahun();
 }
-function renderSemua(data, dariServer){
+function setTxt(id, val){
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function setBadge(id, label, className){
+  const el = document.getElementById(id);
+  if (el) { el.textContent = label; el.className = className; }
+}
+// ============================================================
+// RINGKASAN (Page 1) - mode single-station, memakai id polos
+// (tempNow, humNow, dst) - sama seperti dashboard v2.x
+// ============================================================
+function renderRingkasanSingle(data, dariServer){
   const L = data.latest;
   const hist = data.history || [];
   document.getElementById('lastUpdate').textContent =
-    namaStasiun(stasiunAktif) + ' &middot; '.replace('&middot;','·') + ' ' +
+    namaStasiun(viewMode) + ' · ' +
     (dariServer ? "update " : "contoh ") +
     new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-  // ---------- PAGE 1 ----------
   document.getElementById('tempNow').textContent = fmt(L.suhu, 1);
   document.getElementById('humNow').textContent = fmt(L.kelembaban, 0);
   document.getElementById('presNow').textContent = fmt(L.tekanan, 1);
-  renderTrenTekanan(hist, L);
+  renderTrenTekananSingle(hist, L);
   document.getElementById('altNow').textContent = fmt(L.ketinggian, 0);
   const segmen = hitungHujanSegmen(hist);
   const nilaiKumulatif = segmen.total !== null ? segmen.total : Number(L.curah_hujan);
@@ -1060,7 +1146,6 @@ function renderSemua(data, dariServer){
   const windBadge = document.getElementById('windTierBadge');
   windBadge.textContent = tierAngin.label;
   windBadge.className = 'tier-badge ' + tierAngin.tier;
-  // ---------- Status Sistem ----------
   if (L.timestamp) {
     const waktuData = new Date(L.timestamp);
     document.getElementById('statusWaktu').textContent =
@@ -1083,36 +1168,80 @@ function renderSemua(data, dariServer){
     document.getElementById('statusBadge').textContent = '--';
   }
   document.getElementById('statusFirmware').textContent = L.sumber || (dariServer ? '--' : 'Data contoh');
-  // ---------- PAGE 2: charts ----------
-  const labels = hist.map(h => {
-    if (!h.timestamp) return h.jam || '';
-    const d = new Date(h.timestamp);
-    return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) + ' ' +
-           d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-  });
-  chartSuhu = buatLineChart(chartSuhu, 'chartSuhu', labels, hist.map(h => h.suhu), '#E85A2B');
-  chartHum  = buatLineChart(chartHum,  'chartHum',  labels, hist.map(h => h.kelembaban), '#2E9CCA');
-  chartPres = buatLineChart(chartPres, 'chartPres', labels, hist.map(h => h.tekanan), '#F0A93E');
-  const harian = harianDariServer(data.harian || []);
-  chartRainHarian = buatBarChart(chartRainHarian, 'chartRainHarian', harian.labels, harian.values, '#2E9CCA');
-  if (harian.labels.length < 3) {
-    document.getElementById('trenNote').textContent =
-      'Data historis ' + namaStasiun(stasiunAktif) + ' baru mencakup ' + harian.labels.length + ' hari sejak pemasangan sensor - grafik akan semakin lengkap seiring waktu.';
-  } else {
-    document.getElementById('trenNote').textContent = 'Menampilkan data ' + namaStasiun(stasiunAktif) + ' yang tersedia sejak pemasangan sensor.';
-  }
-  // ---------- PAGE 3 ----------
-  renderAnalisaPembungaan(hist, harian);
-  toggleHistori5Tahun();
 }
 // ============================================================
-// Tampilkan blok "Histori 5 Tahun" hanya untuk stasiun yang
-// punya data historis produksi (Kantor Induk); stasiun lain
-// tampil catatan "Histori Belum Tersedia"
+// RINGKASAN (Page 1) - mode "AWS Kebun": tulis nilai KI & TM
+// berdampingan ke id ber-akhiran -KI / -TM di tiap card
+// ============================================================
+function renderRingkasanDuo(){
+  ['KI','TM'].forEach(kode => {
+    const entri = cacheData[kode];
+    if (!entri || !entri.data || !entri.data.latest) {
+      setDuoKosong(kode);
+      return;
+    }
+    const L = entri.data.latest;
+    const hist = entri.data.history || [];
+    setTxt('tempNow-'+kode, fmt(L.suhu, 1));
+    setTxt('humNow-'+kode, fmt(L.kelembaban, 0));
+    setTxt('presNow-'+kode, fmt(L.tekanan, 1));
+    const tren = hitungTrenTekanan(hist, L);
+    const subEl = document.getElementById('trenSub-'+kode);
+    if (subEl) {
+      subEl.textContent = tren.label;
+      subEl.className = 'duo-sub' +
+        (tren.kelas.indexOf('tren-naik') !== -1 ? ' tren-naik' :
+         tren.kelas.indexOf('tren-turun') !== -1 ? ' tren-turun' : '');
+    }
+    setTxt('altNow-'+kode, fmt(L.ketinggian, 0));
+    const segmen = hitungHujanSegmen(hist);
+    const nilaiKumulatif = segmen.total !== null ? segmen.total : Number(L.curah_hujan);
+    setTxt('rainNow-'+kode, fmt(nilaiKumulatif, 1));
+    setTxt('rainPagi-'+kode, segmen.pagi !== null ? fmt(segmen.pagi, 1) : '--');
+    setTxt('rainSiang-'+kode, segmen.siang !== null ? fmt(segmen.siang, 1) : '--');
+    setTxt('rainMalam-'+kode, segmen.malam !== null ? fmt(segmen.malam, 1) : '--');
+    const tierHujan = kategoriHujan(nilaiKumulatif);
+    setBadge('rainTierBadge-'+kode, tierHujan.label, 'tier-badge sm ' + tierHujan.tier);
+    const windSpeed = Number(L.kecepatan_angin) || 0;
+    setTxt('windSpeedNow-'+kode, fmt(windSpeed, 1));
+    const tierAngin = kategoriAngin(windSpeed);
+    setBadge('windTierBadge-'+kode, tierAngin.label, 'tier-badge sm ' + tierAngin.tier);
+    if (L.timestamp) {
+      const waktuData = new Date(L.timestamp);
+      setTxt('statusWaktu-'+kode,
+        waktuData.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) + ' ' +
+        waktuData.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}));
+      const selisihMenit = (new Date() - waktuData) / 60000;
+      let label, kelas;
+      if (selisihMenit < 20) { label = 'Online'; kelas = 'tier-light'; }
+      else if (selisihMenit < 60) { label = 'Terlambat'; kelas = 'tier-moderate'; }
+      else { label = 'Offline'; kelas = 'tier-extreme'; }
+      setBadge('statusBadge-'+kode, label, 'tier-badge sm ' + kelas);
+    } else {
+      setTxt('statusWaktu-'+kode, '--');
+      setBadge('statusBadge-'+kode, '--', 'tier-badge sm');
+    }
+    setTxt('statusFirmware-'+kode, L.sumber || (entri.dariServer ? '--' : 'Data contoh'));
+  });
+}
+function setDuoKosong(kode){
+  ['tempNow','humNow','presNow','altNow','rainNow','rainPagi','rainSiang','rainMalam','windSpeedNow','statusWaktu','statusFirmware'].forEach(pref => {
+    setTxt(pref+'-'+kode, '--');
+  });
+  setBadge('rainTierBadge-'+kode, '--', 'tier-badge sm');
+  setBadge('windTierBadge-'+kode, '--', 'tier-badge sm');
+  setBadge('statusBadge-'+kode, '--', 'tier-badge sm');
+  const subEl = document.getElementById('trenSub-'+kode);
+  if (subEl) subEl.textContent = '--';
+}
+// ============================================================
+// Tampilkan blok "Histori 5 Tahun" untuk stasiun yang punya data
+// historis produksi (Kantor Induk); selalu tampil juga saat mode
+// "AWS Kebun" aktif (karena Kantor Induk termasuk di dalamnya)
 // ============================================================
 function toggleHistori5Tahun(){
-  const s = STATIONS.find(x => x.code === stasiunAktif);
-  const punyaHistori = s && s.hasHistori5Tahun;
+  const punyaHistori = (viewMode === 'KEBUN') ? true :
+    Boolean((STATIONS.find(x => x.code === viewMode) || {}).hasHistori5Tahun);
   document.getElementById('historiKI').style.display = punyaHistori ? '' : 'none';
   document.getElementById('historiBelumAda').style.display = punyaHistori ? 'none' : '';
   if (punyaHistori && !chartHistori) gambarChartHistori();
@@ -1152,14 +1281,11 @@ function kategoriHujan(mm){
   if (mm < 100) return { label: 'Lebat', tier: 'tier-strong' };
   return { label: 'Sangat Lebat', tier: 'tier-extreme' };
 }
-function renderTrenTekanan(hist, latest){
-  const wadah = document.getElementById('trenTekanan');
-  const label = document.getElementById('trenLabel');
-  const panah = document.getElementById('trenArrowPath');
-  if (!latest.timestamp || !hist.length) {
-    wadah.className = 'tren-tekanan';
-    label.textContent = '--';
-    return;
+// Hitung tren tekanan 3 jam terakhir (dipakai versi single dengan
+// ikon panah, maupun versi duo dengan teks kecil saja)
+function hitungTrenTekanan(hist, latest){
+  if (!latest || !latest.timestamp || !hist.length) {
+    return { kelas: 'tren-tekanan', label: '--', panah: null };
   }
   const waktuSekarang = new Date(latest.timestamp).getTime();
   const targetWaktu = waktuSekarang - (3 * 60 * 60 * 1000);
@@ -1171,36 +1297,106 @@ function renderTrenTekanan(hist, latest){
     if (selisih < selisihTerkecil) { selisihTerkecil = selisih; terdekat = h; }
   });
   if (!terdekat || selisihTerkecil > 90 * 60 * 1000) {
-    wadah.className = 'tren-tekanan';
-    label.textContent = 'Mengumpulkan data...';
-    return;
+    return { kelas: 'tren-tekanan', label: 'Mengumpulkan data...', panah: null };
   }
   const delta = Number(latest.tekanan) - Number(terdekat.tekanan);
   const deltaAbs = Math.abs(delta).toFixed(1);
   if (delta > 0.3) {
-    wadah.className = 'tren-tekanan tren-naik';
-    panah.setAttribute('d', 'M12 19V5M12 5l-5 5M12 5l5 5');
-    label.textContent = 'Naik ' + deltaAbs + ' hPa (3 jam terakhir)';
+    return { kelas: 'tren-tekanan tren-naik', label: 'Naik ' + deltaAbs + ' hPa', panah: 'M12 19V5M12 5l-5 5M12 5l5 5' };
   } else if (delta < -0.3) {
-    wadah.className = 'tren-tekanan tren-turun';
-    panah.setAttribute('d', 'M12 5v14M12 19l-5-5M12 19l5-5');
-    label.textContent = 'Turun ' + deltaAbs + ' hPa (3 jam terakhir)';
-  } else {
-    wadah.className = 'tren-tekanan tren-stabil';
-    panah.setAttribute('d', 'M5 12h14');
-    label.textContent = 'Stabil (Δ' + delta.toFixed(1) + ' hPa)';
+    return { kelas: 'tren-tekanan tren-turun', label: 'Turun ' + deltaAbs + ' hPa', panah: 'M12 5v14M12 19l-5-5M12 19l5-5' };
   }
+  return { kelas: 'tren-tekanan tren-stabil', label: 'Stabil (Δ' + delta.toFixed(1) + ' hPa)', panah: 'M5 12h14' };
 }
-function buatLineChart(chartObj, canvasId, labels, values, color){
+function renderTrenTekananSingle(hist, latest){
+  const r = hitungTrenTekanan(hist, latest);
+  const wadah = document.getElementById('trenTekanan');
+  const label = document.getElementById('trenLabel');
+  const panah = document.getElementById('trenArrowPath');
+  wadah.className = r.kelas;
+  label.textContent = r.label + (r.panah && r.kelas !== 'tren-tekanan tren-stabil' && r.label.indexOf('hPa') !== -1 ? ' (3 jam terakhir)' : '');
+  if (r.panah) panah.setAttribute('d', r.panah);
+}
+function buatLabelWaktu(hist){
+  return hist.map(h => {
+    if (!h.timestamp) return h.jam || '';
+    const d = new Date(h.timestamp);
+    return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) + ' ' +
+           d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  });
+}
+// Gabungkan histori 2 stasiun jadi 1 sumbu waktu (dibulatkan ke
+// kelipatan 5 menit terdekat) supaya bisa dibandingkan di 1 grafik,
+// walau kedua stasiun kirim data secara independen & belum tentu
+// persis bersamaan.
+function gabungHistori(histKI, histTM, field){
+  const BUCKET_MS = 5 * 60 * 1000;
+  const titik = new Map();
+  function tambah(hist, kode){
+    (hist || []).forEach(h => {
+      if (!h.timestamp) return;
+      const t = new Date(h.timestamp).getTime();
+      if (isNaN(t)) return;
+      const bucket = Math.round(t / BUCKET_MS) * BUCKET_MS;
+      if (!titik.has(bucket)) titik.set(bucket, { t: bucket, KI: null, TM: null });
+      const nilai = Number(h[field]);
+      if (!isNaN(nilai)) titik.get(bucket)[kode] = nilai;
+    });
+  }
+  tambah(histKI, 'KI');
+  tambah(histTM, 'TM');
+  const urut = Array.from(titik.values()).sort((a, b) => a.t - b.t);
+  const labels = urut.map(p => {
+    const d = new Date(p.t);
+    return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) + ' ' +
+           d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  });
+  return { labels, KI: urut.map(p => p.KI), TM: urut.map(p => p.TM) };
+}
+// Sama seperti di atas, tapi untuk data harian (kunci gabung berupa
+// tanggal kalender, bukan timestamp presisi menit)
+function gabungHarian(harianKI, harianTM){
+  const peta = new Map();
+  function tambah(dataHarian, kode){
+    (dataHarian || []).forEach(h => {
+      const d = new Date(h.tanggal);
+      const valid = !isNaN(d.getTime());
+      const key = valid ? d.toISOString().slice(0, 10) : String(h.tanggal);
+      if (!peta.has(key)) peta.set(key, { key, urut: valid ? d.getTime() : 0, KI: null, TM: null });
+      peta.get(key)[kode] = Math.max(0, Number(h.curah_hujan) || 0);
+    });
+  }
+  tambah(harianKI, 'KI');
+  tambah(harianTM, 'TM');
+  const urut = Array.from(peta.values()).sort((a, b) => a.urut - b.urut);
+  const labels = urut.map(p => {
+    const d = new Date(p.urut);
+    return (p.urut && !isNaN(d.getTime())) ? d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) : p.key;
+  });
+  return { labels, KI: urut.map(p => p.KI), TM: urut.map(p => p.TM) };
+}
+// ============================================================
+// GRAFIK - line & bar chart, menerima array "series" supaya bisa
+// dipakai untuk 1 garis/bar (single-station) maupun 2 garis/bar
+// sekaligus (mode "AWS Kebun": Kantin vs Tama)
+// ============================================================
+function buatLineChart(chartObj, canvasId, labels, series){
   const ctx = document.getElementById(canvasId).getContext('2d');
   if (chartObj) chartObj.destroy();
   return new Chart(ctx, {
     type: 'line',
-    data: { labels, datasets: [{ data: values, borderColor: color, backgroundColor: color + '22', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, tension: 0.35, fill: true }] },
+    data: {
+      labels,
+      datasets: series.map(s => ({
+        data: s.data, label: s.label || '', borderColor: s.color, backgroundColor: s.color + '22',
+        borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, tension: 0.35,
+        fill: series.length === 1, spanGaps: true
+      }))
+    },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
-        legend: { display: false },
+        legend: { display: series.length > 1, position: 'bottom', labels: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 8.5 }, boxWidth: 10 } },
         tooltip: { callbacks: { title: (items) => items[0] ? items[0].label : '' } }
       },
       scales: {
@@ -1213,15 +1409,21 @@ function buatLineChart(chartObj, canvasId, labels, values, color){
     }
   });
 }
-function buatBarChart(chartObj, canvasId, labels, values, color){
+function buatBarChart(chartObj, canvasId, labels, series){
   const ctx = document.getElementById(canvasId).getContext('2d');
   if (chartObj) chartObj.destroy();
   return new Chart(ctx, {
     type: 'bar',
-    data: { labels, datasets: [{ data: values, backgroundColor: color, borderRadius: 4, maxBarThickness: 22 }] },
+    data: {
+      labels,
+      datasets: series.map(s => ({
+        data: s.data, label: s.label || '', backgroundColor: s.color, borderRadius: 4,
+        maxBarThickness: series.length > 1 ? 14 : 22
+      }))
+    },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: { legend: { display: series.length > 1, position: 'bottom', labels: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 8.5 }, boxWidth: 10 } } },
       scales: {
         x: { grid: { display: false }, ticks: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 8 } } },
         y: { grid: { color: 'rgba(43,33,23,0.06)' }, ticks: { color: '#8A7A63', font: { family: 'IBM Plex Mono', size: 9 } } }
@@ -1229,19 +1431,69 @@ function buatBarChart(chartObj, canvasId, labels, values, color){
     }
   });
 }
-function renderAnalisaPembungaan(hist, harian){
-  const bulan = new Date().getMonth();
-  const dalamPeriodeBunga = (bulan >= 5 && bulan <= 8);
-  document.getElementById('badgePeriode').textContent = dalamPeriodeBunga ? 'Taksasi Bunga' : 'Di luar periode';
-  document.getElementById('badgePeriode').className = 'badge ' + (dalamPeriodeBunga ? 'wet' : 'dry');
+// ============================================================
+// TREN (Page 2) - single-station: 1 garis/bar per grafik, sama
+// seperti dashboard v2.x
+// ============================================================
+function renderTrenSingle(data){
+  const hist = data.history || [];
+  const labels = buatLabelWaktu(hist);
+  chartSuhu = buatLineChart(chartSuhu, 'chartSuhu', labels, [{ data: hist.map(h => h.suhu), color: '#E85A2B' }]);
+  chartHum  = buatLineChart(chartHum,  'chartHum',  labels, [{ data: hist.map(h => h.kelembaban), color: '#2E9CCA' }]);
+  chartPres = buatLineChart(chartPres, 'chartPres', labels, [{ data: hist.map(h => h.tekanan), color: '#F0A93E' }]);
+  const harian = harianDariServer(data.harian || []);
+  chartRainHarian = buatBarChart(chartRainHarian, 'chartRainHarian', harian.labels, [{ data: harian.values, color: '#2E9CCA' }]);
+  if (harian.labels.length < 3) {
+    document.getElementById('trenNote').textContent =
+      'Data historis ' + namaStasiun(viewMode) + ' baru mencakup ' + harian.labels.length + ' hari sejak pemasangan sensor - grafik akan semakin lengkap seiring waktu.';
+  } else {
+    document.getElementById('trenNote').textContent = 'Menampilkan data ' + namaStasiun(viewMode) + ' yang tersedia sejak pemasangan sensor.';
+  }
+}
+// ============================================================
+// TREN (Page 2) - mode "AWS Kebun": 2 garis/bar (Kantin vs Tama)
+// dalam 1 grafik per parameter, digabung berdasarkan waktu terdekat
+// ============================================================
+function renderTrenDuo(){
+  const histKI = (cacheData.KI && cacheData.KI.data && cacheData.KI.data.history) || [];
+  const histTM = (cacheData.TM && cacheData.TM.data && cacheData.TM.data.history) || [];
+  const warnaKI = '#E85A2B', warnaTM = '#F0A93E';
+  const gSuhu = gabungHistori(histKI, histTM, 'suhu');
+  chartSuhu = buatLineChart(chartSuhu, 'chartSuhu', gSuhu.labels, [
+    { data: gSuhu.KI, color: warnaKI, label: 'Kantin' },
+    { data: gSuhu.TM, color: warnaTM, label: 'Tama' }
+  ]);
+  const gHum = gabungHistori(histKI, histTM, 'kelembaban');
+  chartHum = buatLineChart(chartHum, 'chartHum', gHum.labels, [
+    { data: gHum.KI, color: warnaKI, label: 'Kantin' },
+    { data: gHum.TM, color: warnaTM, label: 'Tama' }
+  ]);
+  const gPres = gabungHistori(histKI, histTM, 'tekanan');
+  chartPres = buatLineChart(chartPres, 'chartPres', gPres.labels, [
+    { data: gPres.KI, color: warnaKI, label: 'Kantin' },
+    { data: gPres.TM, color: warnaTM, label: 'Tama' }
+  ]);
+  const harianKI = (cacheData.KI && cacheData.KI.data && cacheData.KI.data.harian) || [];
+  const harianTM = (cacheData.TM && cacheData.TM.data && cacheData.TM.data.harian) || [];
+  const gHarian = gabungHarian(harianKI, harianTM);
+  chartRainHarian = buatBarChart(chartRainHarian, 'chartRainHarian', gHarian.labels, [
+    { data: gHarian.KI, color: warnaKI, label: 'Kantin' },
+    { data: gHarian.TM, color: warnaTM, label: 'Tama' }
+  ]);
+  document.getElementById('trenNote').textContent =
+    'Menampilkan perbandingan data Kantor Induk (Kantin) & Tanah Manis (Tama) yang tersedia sejak masing-masing sensor terpasang.';
+}
+// ============================================================
+// ANALISA PEMBUNGAAN (Page 3) - logika deteksi hujan pembuka murni
+// (tanpa sentuh DOM), dipakai bareng oleh mode single & duo
+// ============================================================
+function hitungAnalisa(harian, namaUtkTeks){
   let hariKering = 0;
   for (let i = harian.values.length - 1; i >= 0; i--){
     if (harian.values[i] < 1) hariKering++; else break;
   }
-  document.getElementById('hariKering').textContent = harian.values.length ? (hariKering + ' hari') : '--';
   const last7 = harian.values.slice(-7);
   const total7 = last7.reduce((a,b) => a+b, 0);
-  document.getElementById('hujan7Hari').textContent = harian.values.length ? (total7.toFixed(1) + ' mm') : '--';
   let eventTerdeteksi = null;
   let keringBerjalan = 0;
   for (let i = 0; i < harian.values.length; i++){
@@ -1254,28 +1506,65 @@ function renderAnalisaPembungaan(hist, harian){
       keringBerjalan = 0;
     }
   }
-  const fT = document.getElementById('fenomenaTitle');
-  const fB = document.getElementById('fenomenaBody');
-  const proy = document.getElementById('proyeksi');
+  let fenomenaTitle, fenomenaBody, proyeksi;
   if (harian.values.length < 5) {
-    fT.textContent = 'Mengumpulkan data...';
-    fB.textContent = 'Histori curah hujan ' + namaStasiun(stasiunAktif) + ' masih terlalu pendek (' + harian.values.length + ' hari) untuk mendeteksi pola hujan pembuka. Analisa akan otomatis muncul begitu data terkumpul lebih lengkap.';
-    proy.textContent = '--';
+    fenomenaTitle = 'Mengumpulkan data...';
+    fenomenaBody = 'Histori curah hujan ' + namaUtkTeks + ' masih terlalu pendek (' + harian.values.length + ' hari) untuk mendeteksi pola hujan pembuka. Analisa akan otomatis muncul begitu data terkumpul lebih lengkap.';
+    proyeksi = '--';
   } else if (eventTerdeteksi) {
-    fT.textContent = 'Hujan Pembuka Terdeteksi';
-    fB.textContent = 'Pada ' + eventTerdeteksi.tanggal + ', tercatat ' + eventTerdeteksi.hujan.toFixed(1) +
+    fenomenaTitle = 'Hujan Pembuka Terdeteksi';
+    fenomenaBody = 'Pada ' + eventTerdeteksi.tanggal + ', tercatat ' + eventTerdeteksi.hujan.toFixed(1) +
       'mm hujan setelah ' + eventTerdeteksi.hariKeringSebelum + ' hari kering berturut-turut - pola ini konsisten dengan pemicu pembungaan kopi robusta.';
-    proy.textContent = '+7 s/d +10 hari dari ' + eventTerdeteksi.tanggal;
+    proyeksi = '+7 s/d +10 hari dari ' + eventTerdeteksi.tanggal;
   } else if (hariKering >= 5) {
-    fT.textContent = 'Masa Kering Berlangsung';
-    fB.textContent = 'Sudah ' + hariKering + ' hari tanpa hujan signifikan. Pantau terus - hujan pembuka (≥5mm) dalam beberapa hari ke depan berpotensi memicu pembungaan.';
-    proy.textContent = 'Menunggu hujan pembuka';
+    fenomenaTitle = 'Masa Kering Berlangsung';
+    fenomenaBody = 'Sudah ' + hariKering + ' hari tanpa hujan signifikan. Pantau terus - hujan pembuka (≥5mm) dalam beberapa hari ke depan berpotensi memicu pembungaan.';
+    proyeksi = 'Menunggu hujan pembuka';
   } else {
-    fT.textContent = 'Kondisi Normal';
-    fB.textContent = 'Belum terdeteksi pola hujan pembuka yang jelas dalam data terkini. Curah hujan tersebar tanpa masa kering panjang sebelumnya.';
-    proy.textContent = '--';
+    fenomenaTitle = 'Kondisi Normal';
+    fenomenaBody = 'Belum terdeteksi pola hujan pembuka yang jelas dalam data terkini. Curah hujan tersebar tanpa masa kering panjang sebelumnya.';
+    proyeksi = '--';
   }
-  chartFlowering = buatBarChart(chartFlowering, 'chartFlowering', harian.labels, harian.values, '#E85A2B');
+  return {
+    hariKeringTxt: harian.values.length ? (hariKering + ' hari') : '--',
+    hujan7Txt: harian.values.length ? (total7.toFixed(1) + ' mm') : '--',
+    fenomenaTitle, fenomenaBody, proyeksi
+  };
+}
+function tulisAnalisa(hasil, sufiks){
+  setTxt('hariKering'+sufiks, hasil.hariKeringTxt);
+  setTxt('hujan7Hari'+sufiks, hasil.hujan7Txt);
+  const fT = document.getElementById('fenomenaTitle'+sufiks);
+  if (fT) fT.textContent = hasil.fenomenaTitle;
+  setTxt('fenomenaBody'+sufiks, hasil.fenomenaBody);
+  setTxt('proyeksi'+sufiks, hasil.proyeksi);
+}
+function renderAnalisaSingle(data){
+  const harian = harianDariServer(data.harian || []);
+  const bulan = new Date().getMonth();
+  const dalamPeriodeBunga = (bulan >= 5 && bulan <= 8);
+  document.getElementById('badgePeriode').textContent = dalamPeriodeBunga ? 'Taksasi Bunga' : 'Di luar periode';
+  document.getElementById('badgePeriode').className = 'badge ' + (dalamPeriodeBunga ? 'wet' : 'dry');
+  const hasil = hitungAnalisa(harian, namaStasiun(viewMode));
+  tulisAnalisa(hasil, '');
+  chartFlowering = buatBarChart(chartFlowering, 'chartFlowering', harian.labels, [{ data: harian.values, color: '#E85A2B' }]);
+}
+function renderAnalisaDuo(){
+  const bulan = new Date().getMonth();
+  const dalamPeriodeBunga = (bulan >= 5 && bulan <= 8);
+  document.getElementById('badgePeriode').textContent = dalamPeriodeBunga ? 'Taksasi Bunga' : 'Di luar periode';
+  document.getElementById('badgePeriode').className = 'badge ' + (dalamPeriodeBunga ? 'wet' : 'dry');
+  const harianKIraw = (cacheData.KI && cacheData.KI.data && cacheData.KI.data.harian) || [];
+  const harianTMraw = (cacheData.TM && cacheData.TM.data && cacheData.TM.data.harian) || [];
+  const hasilKI = hitungAnalisa(harianDariServer(harianKIraw), namaStasiun('KI'));
+  const hasilTM = hitungAnalisa(harianDariServer(harianTMraw), namaStasiun('TM'));
+  tulisAnalisa(hasilKI, '-KI');
+  tulisAnalisa(hasilTM, '-TM');
+  const gabung = gabungHarian(harianKIraw, harianTMraw);
+  chartFlowering = buatBarChart(chartFlowering, 'chartFlowering', gabung.labels, [
+    { data: gabung.KI, color: '#E85A2B', label: 'Kantin' },
+    { data: gabung.TM, color: '#F0A93E', label: 'Tama' }
+  ]);
 }
 // ============================================================
 // DATA HISTORIS 5 TAHUN (KHUSUS KANTOR INDUK) - CH periode bunga
@@ -1312,7 +1601,8 @@ function gambarChartHistori(){
 // ============================================================
 // INISIALISASI
 // ============================================================
-bangunSaklarStasiun();
+bangunSaklarMode();
+toggleModeSections();
 updateDots();
 muatData();
 setInterval(muatData, REFRESH_MS);
