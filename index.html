@@ -722,7 +722,7 @@ const WIND_MAX_MS = 15;
 
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
-const DASHBOARD_VERSION = "1.13";
+const DASHBOARD_VERSION = "1.14";
 
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
@@ -733,20 +733,25 @@ document.getElementById('todayDate').textContent =
 // Hujan jam 02:00 tgl 11 Agustus dihitung sebagai bagian dari
 // siklus tanggal 10 Agustus (belum ganti hari sampai jam 06:00)
 // ============================================================
+// ============================================================
+// "Tanggal siklus" - SEJAK PERUBAHAN KLASIFIKASI PTPN I REG 5,
+// siklus harian PERSIS mengikuti kalender (00:00), tidak perlu
+// lagi mundur 1 hari untuk jam-jam awal seperti versi lama (06:00).
+// ============================================================
 function tanggalSiklus(waktu){
   const d = new Date(waktu);
-  if (d.getHours() < 6) d.setDate(d.getDate() - 1);
   return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'});
 }
 
 // ============================================================
 // HITUNG CURAH HUJAN PER SEGMEN WAKTU (pagi/siang/malam) DALAM
-// SIKLUS HARI BERJALAN - segmen: Pagi 06-10:59, Siang 11-16:59,
-// Malam 17:00-05:59 (melewati tengah malam, tetap 1 siklus yang sama)
+// SIKLUS HARI BERJALAN - standar PTPN I REG 5 terbaru:
+// Pagi 00:00-07:59, Siang 08:00-15:59, Malam 16:00-23:59
+// (semua dalam 1 hari kalender yang sama, tidak melewati tengah malam)
 // ============================================================
 function segmenWaktu(jam){
-  if (jam >= 6 && jam < 11) return 'pagi';
-  if (jam >= 11 && jam < 17) return 'siang';
+  if (jam >= 0 && jam < 8) return 'pagi';
+  if (jam >= 8 && jam < 16) return 'siang';
   return 'malam';
 }
 
