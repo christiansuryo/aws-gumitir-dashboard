@@ -663,22 +663,26 @@
             </svg>
           </div>
           <div>
-            <div class="card-value" style="font-size:22px"><span id="windSpeedNow">--</span><small> m/s</small></div>
+                       <div class="card-value" style="font-size:22px"><span id="windSpeedNow">--</span><small> km/jam</small></div>
             <div><span class="tier-badge" id="windTierBadge">--</span></div>
           </div>
         </div>
+                <div class="duo-sub single-only" id="windMaxNow" style="margin-top:8px;" hidden>--</div>
         <div class="duo duo-only full">
           <div class="duo-item">
             <span class="duo-tag code-KI">Kantin</span>
-            <div class="duo-val"><span id="windSpeedNow-KI">--</span><small> m/s</small></div>
+                        <div class="duo-val"><span id="windSpeedNow-KI">--</span></div>
             <span class="tier-badge sm" id="windTierBadge-KI">--</span>
+            <span class="duo-sub" id="windMaxNow-KI">--</span>
           </div>
           <div class="duo-item">
             <span class="duo-tag code-TM">Tama</span>
-            <div class="duo-val"><span id="windSpeedNow-TM">--</span><small> m/s</small></div>
+            <div class="duo-val"><span id="windSpeedNow-TM">--</span></div>
             <span class="tier-badge sm" id="windTierBadge-TM">--</span>
+            <span class="duo-sub" id="windMaxNow-TM">--</span>
           </div>
-        </div>
+        </div>       
+        <div class="duo-sub duo-only" style="text-align:center; margin-top:6px;">km/jam</div>
       </div>
       <div class="card status-widget">
         <div class="card-label">
@@ -864,7 +868,7 @@ const STATIONS = [
   // { code: "SS", name: "Sumbersari", apiUrl: "", active: false, hasHistori5Tahun: false }
 ];
 const REFRESH_MS = 60000;
-const WIND_MAX_MS = 15;
+const WIND_MAX_KMH = 54; // km/jam (setara 15 m/s)
 // Naikkan angka ini setiap kali dashboard direvisi, supaya gampang
 // tahu versi mana yang sedang tampil di HP/laptop kamu
 // v3.0 - Mode tampilan baru "AWS Kebun": saklar di atas sekarang ada
@@ -889,7 +893,14 @@ const WIND_MAX_MS = 15;
 //        (speedometer) + judul "Kecepatan Angin" jadi header card
 //        yang selalu tampil di kedua mode, sama seperti card
 //        lainnya (Suhu, Kelembaban, dst). TIDAK ADA perubahan lain.
-const DASHBOARD_VERSION = "3.1";
+// v3.1.1 - Satuan kecepatan angin diganti dari m/s ke km/jam (sama dengan
+//        BMKG) dan ditambahkan baris "Maks hari ini" di kartu Kecepatan Angin
+//        (dihitung dari history Sheets, tanpa perubahan Apps Script). Data
+//        dari Sheets sudah km/jam. Berubah: label km/jam, WIND_MAX_KMH = 54,
+//        kategoriAngin() menerima km/jam, data contoh disesuaikan. Di mode
+//        "AWS Kebun" satuan ditulis sekali di bawah kartu (bukan di tiap
+//        angka) supaya kartu angin tidak melebar di layar ponsel.
+const DASHBOARD_VERSION = "3.1.1";
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
   new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -1038,7 +1049,7 @@ function buatDataContoh(){
       kelembaban: (55 + Math.cos(i/5) * 15).toFixed(0) * 1,
       tekanan: (955 + Math.sin(i/7) * 3).toFixed(1) * 1,
       curah_hujan: kumulatif,
-      kecepatan_angin: (1 + Math.random() * 3).toFixed(2) * 1,
+      kecepatan_angin: ((1 + Math.random() * 3) * 3.6).toFixed(2) * 1,
       arah_derajat: -1,
       arah_kompas: "-",
       ketinggian: 680,
@@ -1156,7 +1167,7 @@ function renderRingkasanSingle(data, dariServer){
   rainBadge.className = 'tier-badge ' + tierHujan.tier;
   const windSpeed = Number(L.kecepatan_angin) || 0;
   document.getElementById('windSpeedNow').textContent = fmt(windSpeed, 1);
-  const windPct = Math.max(0, Math.min(1, windSpeed / WIND_MAX_MS));
+    const windPct = Math.max(0, Math.min(1, windSpeed / WIND_MAX_KMH));
   const arcLen = 126;
   document.getElementById('speedoArc').style.strokeDashoffset = arcLen - (arcLen * windPct);
   const needleDeg = -90 + (windPct * 180);
@@ -1165,6 +1176,7 @@ function renderRingkasanSingle(data, dariServer){
   const windBadge = document.getElementById('windTierBadge');
   windBadge.textContent = tierAngin.label;
   windBadge.className = 'tier-badge ' + tierAngin.tier;
+    document.getElementById('windMaxNow').textContent = hitungAnginMaksHariIni(hist).lengkap;
   if (L.timestamp) {
     const waktuData = new Date(L.timestamp);
     document.getElementById('statusWaktu').textContent =
@@ -1225,6 +1237,7 @@ function renderRingkasanDuo(){
     setTxt('windSpeedNow-'+kode, fmt(windSpeed, 1));
     const tierAngin = kategoriAngin(windSpeed);
     setBadge('windTierBadge-'+kode, tierAngin.label, 'tier-badge sm ' + tierAngin.tier);
+        setTxt('windMaxNow-'+kode, hitungAnginMaksHariIni(hist).ringkas);
     if (L.timestamp) {
       const waktuData = new Date(L.timestamp);
       setTxt('statusWaktu-'+kode,
@@ -1280,7 +1293,22 @@ function fmt(v, d){
   if (v === undefined || v === null || v === '' || isNaN(v)) return '--';
   return Number(v).toFixed(d);
 }
-function kategoriAngin(ms){
+// Angin maksimum pada hari berjalan (dari history Sheets, satuan km/jam)
+function hitungAnginMaksHariIni(hist){
+  const hariIni = tanggalSiklus(new Date());
+  let maks = null, waktu = null;
+  hist.forEach(h => {
+    if (!h.timestamp || tanggalSiklus(h.timestamp) !== hariIni) return;
+    const v = Number(h.kecepatan_angin);
+    if (isNaN(v)) return;
+    if (maks === null || v > maks) { maks = v; waktu = h.timestamp; }
+  });
+  if (maks === null) return { ringkas: '--', lengkap: '--' };
+  if (maks <= 0) return { ringkas: 'Maks 0', lengkap: 'Maks hari ini 0 km/jam' };
+  const jam = new Date(waktu).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  return { ringkas: 'Maks ' + maks.toFixed(1), lengkap: 'Maks hari ini ' + maks.toFixed(1) + ' km/jam · ' + jam };
+}
+function kategoriAngin(kmh){ const ms = (kmh === null || kmh === undefined) ? NaN : kmh / 3.6;
   if (ms === undefined || ms === null || isNaN(ms)) return { label: '--', tier: 'tier-calm' };
   if (ms < 0.3) return { label: 'Tenang', tier: 'tier-calm' };
   if (ms < 1.6) return { label: 'Sangat Lemah', tier: 'tier-calm' };
