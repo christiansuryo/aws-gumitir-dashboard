@@ -1368,23 +1368,28 @@ function fmt(v, d){
   if (v === undefined || v === null || v === '' || isNaN(v)) return '--';
   return Number(v).toFixed(d);
 }
-// Angin maksimum pada hari berjalan (dari history Sheets, satuan km/jam)
+// Angin maksimum pada hari berjalan (dari history Sheets, satuan km/jam).
+// Memakai kolom angin_maks (hembusan tertinggi per 10 menit, dari firmware
+// baru) kalau ada; baris lama / stasiun yang belum diupdate memakai
+// kecepatan_angin (rata-rata) seperti sebelumnya.
 function hitungAnginMaksHariIni(hist){
   const hariIni = tanggalSiklus(tanggalAcuan());
   const ket = tanggalDipilih ? 'Maks hari itu ' : 'Maks hari ini ';
   let maks = null, waktu = null;
   hist.forEach(h => {
     if (!h.timestamp || tanggalSiklus(h.timestamp) !== hariIni) return;
-    const v = Number(h.kecepatan_angin);
-    if (isNaN(v)) return;
+    const rata = (h.kecepatan_angin === '' || h.kecepatan_angin == null) ? NaN : Number(h.kecepatan_angin);
+    const gust = (h.angin_maks === '' || h.angin_maks == null) ? NaN : Number(h.angin_maks);
+    const kandidat = [rata, gust].filter(x => !isNaN(x));
+    if (!kandidat.length) return;
+    const v = Math.max(...kandidat);
     if (maks === null || v > maks) { maks = v; waktu = h.timestamp; }
   });
   if (maks === null) return { ringkas: '--', lengkap: '--' };
   if (maks <= 0) return { ringkas: 'Maks 0', lengkap: ket + '0 km/jam' };
   const jam = new Date(waktu).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
   return { ringkas: 'Maks ' + maks.toFixed(1), lengkap: ket + maks.toFixed(1) + ' km/jam · ' + jam };
-}
-function kategoriAngin(kmh){ const ms = (kmh === null || kmh === undefined) ? NaN : kmh / 3.6;
+}function kategoriAngin(kmh){ const ms = (kmh === null || kmh === undefined) ? NaN : kmh / 3.6;
   if (ms === undefined || ms === null || isNaN(ms)) return { label: '--', tier: 'tier-calm' };
   if (ms < 0.3) return { label: 'Tenang', tier: 'tier-calm' };
   if (ms < 1.6) return { label: 'Sangat Lemah', tier: 'tier-calm' };
