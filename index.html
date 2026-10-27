@@ -142,6 +142,42 @@
     font-size:8.5px;
     opacity:0.65;
   }
+  /* ---------- Pemilih tanggal (arsip) ---------- */
+  .tanggal-bar{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:0 20px 10px;
+    flex-shrink:0;
+    flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--text-dim);
+  }
+  .tanggal-bar input[type=date]{
+    font-family:inherit;
+    font-size:11px;
+    color:var(--text);
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:5px 10px;
+    min-width:0;
+  }
+  .tgl-btn{
+    font-family:inherit;
+    font-size:10.5px;
+    font-weight:500;
+    padding:6px 12px;
+    border-radius:20px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--text-dim);
+    cursor:pointer;
+    transition:background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .tgl-btn.step{padding:6px 10px; font-size:13px; line-height:1;}
+  .tgl-btn.aktif{background:var(--text); color:#fff; border-color:var(--text);}
   .pager{
     flex:1;
     display:flex;
@@ -493,10 +529,17 @@
 <div class="station-switch" id="stationSwitch">
   <!-- diisi JS dari array MODES -->
 </div>
+<div class="tanggal-bar" id="tanggalBar">
+  <span>Tanggal</span>
+  <button type="button" class="tgl-btn step" id="btnTglKemarin" title="Hari sebelumnya">&#8249;</button>
+  <input type="date" id="pilihTanggal">
+  <button type="button" class="tgl-btn step" id="btnTglBesok" title="Hari berikutnya">&#8250;</button>
+  <button type="button" class="tgl-btn aktif" id="btnHariIni">Real-time</button>
+</div>
 <div class="pager" id="pager">
   <!-- PAGE 1: RINGKASAN LENGKAP -->
   <div class="page" id="page-0">
-    <div class="page-title">Ringkasan Kondisi Saat Ini</div>
+    <div class="page-title" id="judulRingkasan">Ringkasan Kondisi Saat Ini</div>
     <div class="grid-2">
       <div class="card">
         <div class="card-label">
@@ -581,7 +624,7 @@
           <path d="M7 15a4 4 0 0 1 0-8 5.5 5.5 0 0 1 10.6-1.5A4.5 4.5 0 0 1 17 15H7z"/>
           <path d="M9 19l-1 2M13 19l-1 2M17 19l-1 2" stroke-linecap="round"/>
         </svg>
-        Curah Hujan Hari Ini
+        <span id="judulHujan">Curah Hujan Hari Ini</span>
       </div>
       <div class="rain-segments">
         <div class="rseg rseg-pagi">
@@ -623,7 +666,7 @@
       </div>
       <div class="rain-total">
         <div class="rain-total-label single-only" hidden>
-          Kumulatif Hari Ini
+          <span id="labelKumulatif">Kumulatif Hari Ini</span>
           <div><span class="tier-badge" id="rainTierBadge">--</span></div>
         </div>
         <div class="rain-total-value single-only" hidden><span id="rainNow">--</span><small> mm</small></div>
@@ -663,15 +706,15 @@
             </svg>
           </div>
           <div>
-                       <div class="card-value" style="font-size:22px"><span id="windSpeedNow">--</span><small> km/jam</small></div>
+            <div class="card-value" style="font-size:22px"><span id="windSpeedNow">--</span><small> km/jam</small></div>
             <div><span class="tier-badge" id="windTierBadge">--</span></div>
           </div>
         </div>
-                <div class="duo-sub single-only" id="windMaxNow" style="margin-top:8px;" hidden>--</div>
+        <div class="duo-sub single-only" id="windMaxNow" style="margin-top:8px;" hidden>--</div>
         <div class="duo duo-only full">
           <div class="duo-item">
             <span class="duo-tag code-KI">Kantin</span>
-                        <div class="duo-val"><span id="windSpeedNow-KI">--</span></div>
+            <div class="duo-val"><span id="windSpeedNow-KI">--</span></div>
             <span class="tier-badge sm" id="windTierBadge-KI">--</span>
             <span class="duo-sub" id="windMaxNow-KI">--</span>
           </div>
@@ -681,7 +724,7 @@
             <span class="tier-badge sm" id="windTierBadge-TM">--</span>
             <span class="duo-sub" id="windMaxNow-TM">--</span>
           </div>
-        </div>       
+        </div>
         <div class="duo-sub duo-only" style="text-align:center; margin-top:6px;">km/jam</div>
       </div>
       <div class="card status-widget">
@@ -900,7 +943,12 @@ const WIND_MAX_KMH = 54; // km/jam (setara 15 m/s)
 //        kategoriAngin() menerima km/jam, data contoh disesuaikan. Di mode
 //        "AWS Kebun" satuan ditulis sekali di bawah kartu (bukan di tiap
 //        angka) supaya kartu angin tidak melebar di layar ponsel.
-const DASHBOARD_VERSION = "3.1.1";
+// v3.1.2 - Pemilih tanggal (arsip): pilih hari lain untuk melihat ringkasan,
+//        hujan pagi/siang/malam, angin maks, dan tren hari itu. Butuh
+//        Apps Script yang mendukung ?tanggal=YYYY-MM-DD; kalau belum, muncul
+//        pesan "arsip gagal dimuat" (data real-time tidak ikut tertukar).
+//        Halaman Analisa Pembungaan tetap memakai data keseluruhan.
+const DASHBOARD_VERSION = "3.1.2";
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
   new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -908,7 +956,21 @@ document.getElementById('todayDate').textContent =
 // 'KEBUN' = mode gabungan (default), atau kode stasiun ('KI'/'TM')
 // untuk tampilan single-station seperti sebelumnya.
 let viewMode = 'KEBUN';
-const cacheData = {}; // { KI: {data,...}, TM: {...} } - hasil fetch terakhir per stasiun
+const cacheLive = {};   // { KI: {data,...}, TM: {...} } - data real-time terakhir per stasiun (diisi muatData)
+const cacheArsip = {};  // data hari yang dipilih per stasiun (diisi pilihTanggal)
+let cacheData = cacheLive; // yang sedang ditampilkan: cacheLive (real-time) atau cacheArsip
+let tanggalDipilih = null; // null = real-time; 'YYYY-MM-DD' = tampilkan arsip hari itu
+function tglKeStr(d){
+  const p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+}
+// Acuan "hari ini" untuk segmen hujan & angin maks: hari yang dipilih, atau hari ini
+function tanggalAcuan(){
+  return tanggalDipilih ? new Date(tanggalDipilih + 'T12:00:00') : new Date();
+}
+function tanggalPendek(str){
+  return new Date(str + 'T12:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 // ============================================================
 // SAKLAR MODE TAMPILAN (pills): "AWS Kebun" (gabungan) + tiap stasiun
@@ -950,8 +1012,10 @@ function toggleModeSections(){
   document.querySelectorAll('.duo-only').forEach(el => { el.hidden = !isKebun; });
 }
 function kosongkanTampilanDetail(){
-  document.getElementById('lastUpdate').textContent = 'menunggu data ' + namaStasiun(viewMode) + '...';
-  ['tempNow','humNow','presNow','altNow','rainNow','rainPagi','rainSiang','rainMalam','windSpeedNow'].forEach(id => {
+  document.getElementById('lastUpdate').textContent = tanggalDipilih ?
+    'tidak ada data ' + namaStasiun(viewMode) + ' · ' + tanggalPendek(tanggalDipilih) :
+    'menunggu data ' + namaStasiun(viewMode) + '...';
+  ['tempNow','humNow','presNow','altNow','rainNow','rainPagi','rainSiang','rainMalam','windSpeedNow','windMaxNow','statusWaktu','statusFirmware'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = '--';
   });
@@ -981,7 +1045,7 @@ function segmenWaktu(jam){
   return 'malam';
 }
 function hitungHujanSegmen(hist){
-  const siklusSekarang = tanggalSiklus(new Date());
+  const siklusSekarang = tanggalSiklus(tanggalAcuan());
   const dataSiklusIni = hist
     .filter(h => h.timestamp && tanggalSiklus(h.timestamp) === siklusSekarang)
     .sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
@@ -1091,17 +1155,18 @@ async function fetchDenganRetry(url, percobaanMaks = 3){
 // perlu untuk mode "AWS Kebun" (nampilin 2 stasiun sekaligus di tiap
 // card) maupun supaya ganti mode instan dari cache tanpa fetch ulang.
 async function muatData(){
+  document.getElementById('pilihTanggal').max = tglKeStr(new Date());
   const stasiunAktifList = STATIONS.filter(s => s.active);
   await Promise.all(stasiunAktifList.map(async (s) => {
     const data = await fetchDenganRetry(s.apiUrl);
     if (data) {
-      cacheData[s.code] = { data, dariServer: true };
-    } else if (!cacheData[s.code]) {
+      cacheLive[s.code] = { data, dariServer: true };
+    } else if (!cacheLive[s.code]) {
       // belum pernah dapat data sama sekali dari stasiun ini - pakai contoh
       // HANYA untuk stasiun pertama di daftar, supaya tidak membingungkan
       // kalau ternyata semua stasiun memang belum live
       if (s.code === stasiunAktifList[0].code) {
-        cacheData[s.code] = { data: DATA_CONTOH, dariServer: false };
+        cacheLive[s.code] = { data: DATA_CONTOH, dariServer: false };
       }
     }
   }));
@@ -1113,8 +1178,12 @@ async function muatData(){
 // ============================================================
 function renderDashboard(){
   toggleModeSections();
+  setTxt('judulHujan', tanggalDipilih ? 'Curah Hujan ' + tanggalPendek(tanggalDipilih) : 'Curah Hujan Hari Ini');
+  setTxt('labelKumulatif', tanggalDipilih ? 'Kumulatif Hari Itu' : 'Kumulatif Hari Ini');
+  setTxt('judulRingkasan', tanggalDipilih ? 'Ringkasan Kondisi · Data Terakhir ' + tanggalPendek(tanggalDipilih) : 'Ringkasan Kondisi Saat Ini');
   if (viewMode === 'KEBUN') {
-    document.getElementById('lastUpdate').textContent =
+    document.getElementById('lastUpdate').textContent = tanggalDipilih ?
+      'AWS Kebun · arsip ' + tanggalPendek(tanggalDipilih) :
       'AWS Kebun · update ' + new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
     renderRingkasanDuo();
     renderTrenDuo();
@@ -1127,6 +1196,7 @@ function renderDashboard(){
       renderAnalisaSingle(entri.data);
     } else {
       kosongkanTampilanDetail();
+      if (tanggalDipilih) { renderTrenSingle({ history: [], harian: [] }); }
     }
   }
   toggleHistori5Tahun();
@@ -1146,7 +1216,8 @@ function setBadge(id, label, className){
 function renderRingkasanSingle(data, dariServer){
   const L = data.latest;
   const hist = data.history || [];
-  document.getElementById('lastUpdate').textContent =
+  document.getElementById('lastUpdate').textContent = tanggalDipilih ?
+    namaStasiun(viewMode) + ' · arsip ' + tanggalPendek(tanggalDipilih) :
     namaStasiun(viewMode) + ' · ' +
     (dariServer ? "update " : "contoh ") +
     new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
@@ -1167,7 +1238,7 @@ function renderRingkasanSingle(data, dariServer){
   rainBadge.className = 'tier-badge ' + tierHujan.tier;
   const windSpeed = Number(L.kecepatan_angin) || 0;
   document.getElementById('windSpeedNow').textContent = fmt(windSpeed, 1);
-    const windPct = Math.max(0, Math.min(1, windSpeed / WIND_MAX_KMH));
+  const windPct = Math.max(0, Math.min(1, windSpeed / WIND_MAX_KMH));
   const arcLen = 126;
   document.getElementById('speedoArc').style.strokeDashoffset = arcLen - (arcLen * windPct);
   const needleDeg = -90 + (windPct * 180);
@@ -1176,7 +1247,7 @@ function renderRingkasanSingle(data, dariServer){
   const windBadge = document.getElementById('windTierBadge');
   windBadge.textContent = tierAngin.label;
   windBadge.className = 'tier-badge ' + tierAngin.tier;
-    document.getElementById('windMaxNow').textContent = hitungAnginMaksHariIni(hist).lengkap;
+  document.getElementById('windMaxNow').textContent = hitungAnginMaksHariIni(hist).lengkap;
   if (L.timestamp) {
     const waktuData = new Date(L.timestamp);
     document.getElementById('statusWaktu').textContent =
@@ -1184,7 +1255,10 @@ function renderRingkasanSingle(data, dariServer){
       waktuData.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
     const selisihMenit = (new Date() - waktuData) / 60000;
     const statusBadge = document.getElementById('statusBadge');
-    if (selisihMenit < 20) {
+    if (tanggalDipilih) {
+      statusBadge.textContent = 'Arsip';
+      statusBadge.className = 'tier-badge tier-calm';
+    } else if (selisihMenit < 20) {
       statusBadge.textContent = 'Online';
       statusBadge.className = 'tier-badge tier-light';
     } else if (selisihMenit < 60) {
@@ -1237,7 +1311,7 @@ function renderRingkasanDuo(){
     setTxt('windSpeedNow-'+kode, fmt(windSpeed, 1));
     const tierAngin = kategoriAngin(windSpeed);
     setBadge('windTierBadge-'+kode, tierAngin.label, 'tier-badge sm ' + tierAngin.tier);
-        setTxt('windMaxNow-'+kode, hitungAnginMaksHariIni(hist).ringkas);
+    setTxt('windMaxNow-'+kode, hitungAnginMaksHariIni(hist).ringkas);
     if (L.timestamp) {
       const waktuData = new Date(L.timestamp);
       setTxt('statusWaktu-'+kode,
@@ -1245,7 +1319,8 @@ function renderRingkasanDuo(){
         waktuData.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}));
       const selisihMenit = (new Date() - waktuData) / 60000;
       let label, kelas;
-      if (selisihMenit < 20) { label = 'Online'; kelas = 'tier-light'; }
+      if (tanggalDipilih) { label = 'Arsip'; kelas = 'tier-calm'; }
+      else if (selisihMenit < 20) { label = 'Online'; kelas = 'tier-light'; }
       else if (selisihMenit < 60) { label = 'Terlambat'; kelas = 'tier-moderate'; }
       else { label = 'Offline'; kelas = 'tier-extreme'; }
       setBadge('statusBadge-'+kode, label, 'tier-badge sm ' + kelas);
@@ -1295,7 +1370,8 @@ function fmt(v, d){
 }
 // Angin maksimum pada hari berjalan (dari history Sheets, satuan km/jam)
 function hitungAnginMaksHariIni(hist){
-  const hariIni = tanggalSiklus(new Date());
+  const hariIni = tanggalSiklus(tanggalAcuan());
+  const ket = tanggalDipilih ? 'Maks hari itu ' : 'Maks hari ini ';
   let maks = null, waktu = null;
   hist.forEach(h => {
     if (!h.timestamp || tanggalSiklus(h.timestamp) !== hariIni) return;
@@ -1304,9 +1380,9 @@ function hitungAnginMaksHariIni(hist){
     if (maks === null || v > maks) { maks = v; waktu = h.timestamp; }
   });
   if (maks === null) return { ringkas: '--', lengkap: '--' };
-  if (maks <= 0) return { ringkas: 'Maks 0', lengkap: 'Maks hari ini 0 km/jam' };
+  if (maks <= 0) return { ringkas: 'Maks 0', lengkap: ket + '0 km/jam' };
   const jam = new Date(waktu).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-  return { ringkas: 'Maks ' + maks.toFixed(1), lengkap: 'Maks hari ini ' + maks.toFixed(1) + ' km/jam · ' + jam };
+  return { ringkas: 'Maks ' + maks.toFixed(1), lengkap: ket + maks.toFixed(1) + ' km/jam · ' + jam };
 }
 function kategoriAngin(kmh){ const ms = (kmh === null || kmh === undefined) ? NaN : kmh / 3.6;
   if (ms === undefined || ms === null || isNaN(ms)) return { label: '--', tier: 'tier-calm' };
@@ -1520,8 +1596,8 @@ function renderTrenDuo(){
     { data: gPres.KI, color: warnaKI, label: 'Kantin' },
     { data: gPres.TM, color: warnaTM, label: 'Tama' }
   ]);
-  const harianKI = (cacheData.KI && cacheData.KI.data && cacheData.KI.data.harian) || [];
-  const harianTM = (cacheData.TM && cacheData.TM.data && cacheData.TM.data.harian) || [];
+  const harianKI = (cacheLive.KI && cacheLive.KI.data && cacheLive.KI.data.harian) || [];
+  const harianTM = (cacheLive.TM && cacheLive.TM.data && cacheLive.TM.data.harian) || [];
   const gHarian = gabungHarian(harianKI, harianTM);
   chartRainHarian = buatBarChart(chartRainHarian, 'chartRainHarian', gHarian.labels, [
     { data: gHarian.KI, color: warnaKI, label: 'Kantin' },
@@ -1601,8 +1677,8 @@ function renderAnalisaDuo(){
   const dalamPeriodeBunga = (bulan >= 5 && bulan <= 8);
   document.getElementById('badgePeriode').textContent = dalamPeriodeBunga ? 'Taksasi Bunga' : 'Di luar periode';
   document.getElementById('badgePeriode').className = 'badge ' + (dalamPeriodeBunga ? 'wet' : 'dry');
-  const harianKIraw = (cacheData.KI && cacheData.KI.data && cacheData.KI.data.harian) || [];
-  const harianTMraw = (cacheData.TM && cacheData.TM.data && cacheData.TM.data.harian) || [];
+  const harianKIraw = (cacheLive.KI && cacheLive.KI.data && cacheLive.KI.data.harian) || [];
+  const harianTMraw = (cacheLive.TM && cacheLive.TM.data && cacheLive.TM.data.harian) || [];
   const hasilKI = hitungAnalisa(harianDariServer(harianKIraw), namaStasiun('KI'));
   const hasilTM = hitungAnalisa(harianDariServer(harianTMraw), namaStasiun('TM'));
   tulisAnalisa(hasilKI, '-KI');
@@ -1646,8 +1722,81 @@ function gambarChartHistori(){
 // stasiun (bukan tombol publik di dashboard) - cuma Editor
 // spreadsheet yang bisa memicu reset.
 // ============================================================
+// PILIH TANGGAL (ARSIP) - butuh Apps Script yang mendukung
+// ?tanggal=YYYY-MM-DD (fungsi ambilDataHari_ di Apps Script)
+// ============================================================
+async function ambilHari(url, tanggal){
+  if (!url || url.indexOf('GANTI_DENGAN') === 0) return null;
+  for (let i = 0; i < 2; i++){
+    const controller = new AbortController();
+    const batasWaktu = setTimeout(() => controller.abort(), 20000);
+    try {
+      const res = await fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'tanggal=' + encodeURIComponent(tanggal),
+                              { cache: "no-store", signal: controller.signal });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      // Apps Script lama mengabaikan ?tanggal dan membalas data real-time -
+      // jangan sampai ditampilkan seolah-olah arsip
+      if (data.status !== 'ok' || data.tanggal !== tanggal) throw new Error("Apps Script belum mendukung ?tanggal");
+      return data;
+    } catch (err) {
+      console.warn("[arsip " + tanggal + "] percobaan " + (i + 1) + "/2 gagal:", err);
+    } finally {
+      clearTimeout(batasWaktu);
+    }
+  }
+  return null;
+}
+function perbaruiBarTanggal(){
+  document.getElementById('pilihTanggal').value = tanggalDipilih || '';
+  document.getElementById('btnHariIni').classList.toggle('aktif', !tanggalDipilih);
+}
+async function pilihTanggal(str){
+  if (!str || str >= tglKeStr(new Date())) { kembaliKeRealtime(); return; }
+  tanggalDipilih = str;
+  Object.keys(cacheArsip).forEach(k => delete cacheArsip[k]);
+  cacheData = cacheArsip; // jangan tampilkan data real-time dengan label arsip selama memuat
+  perbaruiBarTanggal();
+  document.getElementById('lastUpdate').textContent = 'memuat arsip ' + tanggalPendek(str) + '...';
+  const stasiunAktifList = STATIONS.filter(s => s.active);
+  const hasil = await Promise.all(stasiunAktifList.map(async s => [s.code, await ambilHari(s.apiUrl, str)]));
+  if (tanggalDipilih !== str) return; // pilihan sudah berganti selama menunggu
+  Object.keys(cacheArsip).forEach(k => delete cacheArsip[k]);
+  let adaYangBerhasil = false;
+  hasil.forEach(([kode, d]) => {
+    if (!d) return;
+    adaYangBerhasil = true;
+    if (!d.latest) return; // stasiun merespons tapi tidak ada data di hari itu
+    const live = cacheLive[kode] && cacheLive[kode].data;
+    cacheArsip[kode] = { data: { latest: d.latest, history: d.history || [], harian: live ? (live.harian || []) : [] }, dariServer: true };
+  });
+  cacheData = cacheArsip;
+  renderDashboard();
+  if (!adaYangBerhasil) {
+    document.getElementById('lastUpdate').textContent = 'arsip gagal dimuat (cek Apps Script)';
+  }
+}
+function kembaliKeRealtime(){
+  tanggalDipilih = null;
+  cacheData = cacheLive;
+  perbaruiBarTanggal();
+  renderDashboard();
+}
+function geserTanggal(n){
+  const dasar = tanggalDipilih ? new Date(tanggalDipilih + 'T12:00:00') : new Date();
+  dasar.setDate(dasar.getDate() + n);
+  const str = tglKeStr(dasar);
+  if (str >= tglKeStr(new Date())) { kembaliKeRealtime(); return; }
+  pilihTanggal(str);
+}
+// ============================================================
 // INISIALISASI
 // ============================================================
+document.getElementById('pilihTanggal').max = tglKeStr(new Date());
+document.getElementById('pilihTanggal').addEventListener('change', e => pilihTanggal(e.target.value));
+document.getElementById('btnHariIni').addEventListener('click', kembaliKeRealtime);
+document.getElementById('btnTglKemarin').addEventListener('click', () => geserTanggal(-1));
+document.getElementById('btnTglBesok').addEventListener('click', () => geserTanggal(1));
 bangunSaklarMode();
 toggleModeSections();
 updateDots();
