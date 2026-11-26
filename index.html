@@ -1060,7 +1060,8 @@ function tanggalPendek(str){
 // Stasiun yang tampil: aktif DAN (wajib, atau sudah pernah mengirim data asli)
 function stasiunSiap(){
   return STATIONS.filter(s => s.active &&
-    (s.wajib || (cacheLive[s.code] && cacheLive[s.code].dariServer)));
+    (s.wajib || (cacheLive[s.code] && cacheLive[s.code].dariServer &&
+      cacheLive[s.code].data && cacheLive[s.code].data.latest)));
 }
 function hitungModes(){
   return [{ code: 'KEBUN', label: 'AWS Kebun' }]
