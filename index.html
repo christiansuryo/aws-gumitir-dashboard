@@ -525,6 +525,58 @@
   body.tiga .status-duo{gap:6px;}
   body.tiga .duo-num{font-size:9.5px;}
   body.tiga .tier-badge.sm{font-size:7px; padding:1.5px 4px;}
+  /* ---------- v3.3: kartu panel (judul+ikon di kiri, angka lebih besar) ---------- */
+  .grid-2, .widget-row{grid-template-columns:minmax(0,1fr);}
+  .pcard{display:flex; padding:0; overflow:hidden; margin-bottom:0;}
+  .pl{width:78px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:10px 4px; text-align:center; background:var(--pc-bg);}
+  .pl .icon{width:24px; height:24px;}
+  .pl b{font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.1em; color:var(--text);}
+  .pl span{font-size:11px; color:var(--text-dim);}
+  .pb{flex:1; min-width:0; padding:11px 12px; display:flex; flex-direction:column; justify-content:center;}
+  .pb .duo{gap:6px;}
+  .pb .duo-tag, .rhd .duo-tag{font-size:11px; letter-spacing:0.06em; margin-bottom:1px;}
+  .pb .duo-val{font-size:27px; line-height:1.15;}
+  .pb .duo-sub{font-size:11px; margin-top:1px;}
+  .pb .tier-badge.sm, .rain-total .tier-badge.sm{
+    font-family:'IBM Plex Sans',sans-serif; font-size:11px; text-transform:lowercase;
+    letter-spacing:0; padding:2px 6px; border-radius:6px; margin-top:3px; line-height:1.3;}
+  .pb .tier-badge.sm::first-letter, .rain-total .tier-badge.sm::first-letter{text-transform:uppercase;}
+  .pcard.status-widget{flex-direction:row;}
+  .pcard.status-widget .pb{display:block;}
+  .pb .duo.full .duo-item{display:flex; flex-direction:column; align-items:flex-start;}
+  .pb .duo.full .duo-item > .tier-badge.sm{margin-bottom:7px;}
+  .pb .duo.full .duo-item > .st-date + .tier-badge.sm{margin-bottom:0;}
+  .mx{border-top:1px dashed var(--line); margin-top:auto; padding-top:5px; align-self:stretch;}
+  .mx small{display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.06em; color:var(--text-dim);}
+  .pb .duo-val.mxv{font-size:19px;}
+  .st-time .duo-val, .pb .duo-val.st-time{font-size:22px;}
+  .st-date{display:block; font-size:11px; color:var(--text-dim);}
+  .st-fw{display:block; font-size:11px; color:var(--text-dim); margin-top:4px; word-break:break-word; line-height:1.3;}
+  .rhd{display:flex; padding:0 0 4px;}
+  .rhd .sp{width:84px; flex-shrink:0;}
+  .rhd .duo{flex:1; padding-right:10px; gap:6px;}
+  .rrow{display:flex; align-items:center; border-radius:12px; margin-bottom:6px; overflow:hidden;}
+  .rl{width:84px; flex-shrink:0; display:flex; align-items:center; gap:6px; padding:8px 8px;}
+  .rl-icon{width:22px; height:22px; flex-shrink:0;}
+  .rl b{display:block; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.08em;}
+  .rl span{display:block; font-size:11px; color:var(--text-dim);}
+  .rv{flex:1; min-width:0; padding:8px 10px 8px 0;}
+  .rrow .duo{gap:6px;}
+  .rrow .duo-val{font-size:22px; line-height:1.15;}
+  .rrow .rseg-value{font-size:22px;}
+  .rain-total{align-items:center; padding:8px 0;}
+  .rain-total .rl-tot{padding:0 8px;}
+  .rain-total .duo.full{padding-right:10px; gap:6px;}
+  .rain-total .duo-val{font-size:26px; line-height:1.15;}
+  body.tiga .pcard .duo, body.tiga .rhd .duo, body.tiga .rrow .duo{gap:6px;}
+  body.tiga .pb .duo-val{font-size:27px;}
+  body.tiga .pb .duo-val.mxv{font-size:19px;}
+  body.tiga .pb .duo-val.st-time{font-size:22px;}
+  body.tiga .rrow .duo-val{font-size:22px;}
+  body.tiga .rain-total .duo-val{font-size:26px;}
+  body.tiga .pb .duo-tag, body.tiga .rhd .duo-tag{font-size:11px;}
+  body.tiga .pb .duo-sub{font-size:11px;}
+  body.tiga .pb .tier-badge.sm, body.tiga .rain-total .tier-badge.sm{font-size:11px; padding:2px 6px;}
 </style>
 </head>
 <body>
@@ -556,101 +608,61 @@
   <div class="page" id="page-0">
     <div class="page-title" id="judulRingkasan">Ringkasan Kondisi Saat Ini</div>
     <div class="grid-2">
-      <div class="card">
-        <div class="card-label">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.6"><path d="M12 3a2 2 0 0 0-2 2v9.17a3.5 3.5 0 1 0 4 0V5a2 2 0 0 0-2-2z"/><path d="M12 8v6"/></svg>
-          Suhu
-        </div>
-        <div class="card-value single-only" hidden><span id="tempNow">--</span><small> °C</small></div>
-        <div class="duo duo-only">
-          <div class="duo-item">
-            <span class="duo-tag code-KI">Kantin</span>
-            <span class="duo-val"><span id="tempNow-KI">--</span><small> °C</small></span>
-          </div>
-          <div class="duo-item">
-            <span class="duo-tag code-TM">Tama</span>
-            <span class="duo-val"><span id="tempNow-TM">--</span><small> °C</small></span>
-          </div>
-          <div class="duo-item" data-st="SS">
-            <span class="duo-tag code-SS">SS</span>
-            <span class="duo-val"><span id="tempNow-SS">--</span><small> °C</small></span>
+      <div class="card pcard">
+        <div class="pl" style="--pc-bg:#FDE3D6"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.6"><path d="M12 3a2 2 0 0 0-2 2v9.17a3.5 3.5 0 1 0 4 0V5a2 2 0 0 0-2-2z"/><path d="M12 8v6"/></svg><b>SUHU</b><span>(°C)</span></div>
+        <div class="pb">
+          <div class="card-value single-only" hidden><span id="tempNow">--</span></div>
+          
+          <div class="duo duo-only">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="tempNow-KI">--</span></span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="tempNow-TM">--</span></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="tempNow-SS">--</span></span></div>
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-label">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6"><path d="M12 3s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg>
-          Kelembaban
-        </div>
-        <div class="card-value single-only" hidden><span id="humNow">--</span><small> %</small></div>
-        <div class="duo duo-only">
-          <div class="duo-item">
-            <span class="duo-tag code-KI">Kantin</span>
-            <span class="duo-val"><span id="humNow-KI">--</span><small> %</small></span>
-          </div>
-          <div class="duo-item">
-            <span class="duo-tag code-TM">Tama</span>
-            <span class="duo-val"><span id="humNow-TM">--</span><small> %</small></span>
-          </div>
-          <div class="duo-item" data-st="SS">
-            <span class="duo-tag code-SS">SS</span>
-            <span class="duo-val"><span id="humNow-SS">--</span><small> %</small></span>
+      <div class="card pcard">
+        <div class="pl" style="--pc-bg:#DCEEF9"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6"><path d="M12 3s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"/></svg><b>RH</b><span>(%)</span></div>
+        <div class="pb">
+          <div class="card-value single-only" hidden><span id="humNow">--</span></div>
+          
+          <div class="duo duo-only">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="humNow-KI">--</span></span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="humNow-TM">--</span></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="humNow-SS">--</span></span></div>
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-label">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-          Tekanan
-        </div>
-        <div class="card-value single-only" hidden><span id="presNow">--</span><small> hPa</small></div>
-        <div class="tren-tekanan single-only" id="trenTekanan" hidden>
+      <div class="card pcard">
+        <div class="pl" style="--pc-bg:#FBEBC8"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>TEKANAN</b><span>(hPa)</span></div>
+        <div class="pb">
+          <div class="card-value single-only" hidden><span id="presNow">--</span></div>
+          <div class="tren-tekanan single-only" id="trenTekanan" hidden>
           <svg class="tren-icon" id="trenIcon" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="2">
             <path id="trenArrowPath" d="M12 19V5M12 5l-5 5M12 5l5 5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <span id="trenLabel">--</span>
         </div>
-        <div class="duo duo-only">
-          <div class="duo-item">
-            <span class="duo-tag code-KI">Kantin</span>
-            <span class="duo-val"><span id="presNow-KI">--</span><small> hPa</small></span>
-            <span class="duo-sub" id="trenSub-KI">--</span>
-          </div>
-          <div class="duo-item">
-            <span class="duo-tag code-TM">Tama</span>
-            <span class="duo-val"><span id="presNow-TM">--</span><small> hPa</small></span>
-            <span class="duo-sub" id="trenSub-TM">--</span>
-          </div>
-          <div class="duo-item" data-st="SS">
-            <span class="duo-tag code-SS">SS</span>
-            <span class="duo-val"><span id="presNow-SS">--</span><small> hPa</small></span>
-            <span class="duo-sub" id="trenSub-SS">--</span>
+          <div class="duo duo-only">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="presNow-KI">--</span></span><span class="duo-sub" id="trenSub-KI">--</span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="presNow-TM">--</span></span><span class="duo-sub" id="trenSub-TM">--</span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="presNow-SS">--</span></span><span class="duo-sub" id="trenSub-SS">--</span></div>
           </div>
         </div>
       </div>
-      <div class="card">
-        <div class="card-label">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.6"><path d="M3 20l6-11 4 6 3-5 5 10z"/></svg>
-          Ketinggian
-        </div>
-        <div class="card-value single-only" hidden><span id="altNow">--</span><small> mdpl</small></div>
-        <div class="duo duo-only">
-          <div class="duo-item">
-            <span class="duo-tag code-KI">Kantin</span>
-            <span class="duo-val"><span id="altNow-KI">--</span><small> mdpl</small></span>
-          </div>
-          <div class="duo-item">
-            <span class="duo-tag code-TM">Tama</span>
-            <span class="duo-val"><span id="altNow-TM">--</span><small> mdpl</small></span>
-          </div>
-          <div class="duo-item" data-st="SS">
-            <span class="duo-tag code-SS">SS</span>
-            <span class="duo-val"><span id="altNow-SS">--</span><small> mdpl</small></span>
+      <div class="card pcard">
+        <div class="pl" style="--pc-bg:#EDE4DA"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.6"><path d="M3 20l6-11 4 6 3-5 5 10z"/></svg><b>ELEV</b><span>(mdpl)</span></div>
+        <div class="pb">
+          <div class="card-value single-only" hidden><span id="altNow">--</span></div>
+          
+          <div class="duo duo-only">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="altNow-KI">--</span></span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="altNow-TM">--</span></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="altNow-SS">--</span></span></div>
           </div>
         </div>
       </div>
     </div>
-    <div class="card" style="margin-bottom:9px; padding:14px 16px;">
+    <div class="card" style="margin-bottom:9px; padding:14px 12px;">
       <div class="card-label">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6">
           <path d="M7 15a4 4 0 0 1 0-8 5.5 5.5 0 0 1 10.6-1.5A4.5 4.5 0 0 1 17 15H7z"/>
@@ -658,83 +670,72 @@
         </svg>
         <span id="judulHujan">Curah Hujan Hari Ini</span>
       </div>
-      <div class="rain-segments">
-        <div class="rseg rseg-pagi">
-          <svg class="rseg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.7">
+      <div class="rhd duo-only"><span class="sp"></span><div class="duo"><div class="duo-item"><span class="duo-tag code-KI">Kantin</span></div><div class="duo-item"><span class="duo-tag code-TM">Tama</span></div><div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span></div></div></div>
+      <div class="rrow rseg-pagi">
+        <div class="rl"><svg class="rl-icon" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.7">
             <path d="M12 3v2M4.2 11H2M22 11h-2.2M5.6 4.6l1.4 1.4M18.4 4.6L17 6" stroke-linecap="round"/>
             <path d="M6 11a6 6 0 0 1 12 0" />
             <path d="M3 15h18" stroke-linecap="round"/>
-          </svg>
-          <div class="rseg-label">Pagi</div>
-          <div class="rseg-value single-only" hidden><span id="rainPagi">--</span> <small>mm</small></div>
+          </svg><div><b>PAGI</b><span>(mm)</span></div></div>
+        <div class="rv">
+          <div class="rseg-value single-only" hidden><span id="rainPagi">--</span></div>
           <div class="duo duo-only rseg-duo">
-            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainPagi-KI">--</span><small> mm</small></span></div>
-            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainPagi-TM">--</span><small> mm</small></span></div>
-            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="rainPagi-SS">--</span><small> mm</small></span></div>
+            <div class="duo-item"><span class="duo-val"><span id="rainPagi-KI">--</span></span></div>
+            <div class="duo-item"><span class="duo-val"><span id="rainPagi-TM">--</span></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-val"><span id="rainPagi-SS">--</span></span></div>
           </div>
         </div>
-        <div class="rseg rseg-siang">
-          <svg class="rseg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.7">
+      </div>
+      <div class="rrow rseg-siang">
+        <div class="rl"><svg class="rl-icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.7">
             <circle cx="12" cy="12" r="4.2"/>
             <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke-linecap="round"/>
-          </svg>
-          <div class="rseg-label">Siang</div>
-          <div class="rseg-value single-only" hidden><span id="rainSiang">--</span> <small>mm</small></div>
+          </svg><div><b>SIANG</b><span>(mm)</span></div></div>
+        <div class="rv">
+          <div class="rseg-value single-only" hidden><span id="rainSiang">--</span></div>
           <div class="duo duo-only rseg-duo">
-            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainSiang-KI">--</span><small> mm</small></span></div>
-            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainSiang-TM">--</span><small> mm</small></span></div>
-            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="rainSiang-SS">--</span><small> mm</small></span></div>
+            <div class="duo-item"><span class="duo-val"><span id="rainSiang-KI">--</span></span></div>
+            <div class="duo-item"><span class="duo-val"><span id="rainSiang-TM">--</span></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-val"><span id="rainSiang-SS">--</span></span></div>
           </div>
         </div>
-        <div class="rseg rseg-malam">
-          <svg class="rseg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--night)" stroke-width="1.7">
+      </div>
+      <div class="rrow rseg-malam">
+        <div class="rl"><svg class="rl-icon" viewBox="0 0 24 24" fill="none" stroke="var(--night)" stroke-width="1.7">
             <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/>
-          </svg>
-          <div class="rseg-label">Malam</div>
-          <div class="rseg-value single-only" hidden><span id="rainMalam">--</span> <small>mm</small></div>
+          </svg><div><b>MALAM</b><span>(mm)</span></div></div>
+        <div class="rv">
+          <div class="rseg-value single-only" hidden><span id="rainMalam">--</span></div>
           <div class="duo duo-only rseg-duo">
-            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainMalam-KI">--</span><small> mm</small></span></div>
-            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainMalam-TM">--</span><small> mm</small></span></div>
-            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="rainMalam-SS">--</span><small> mm</small></span></div>
+            <div class="duo-item"><span class="duo-val"><span id="rainMalam-KI">--</span></span></div>
+            <div class="duo-item"><span class="duo-val"><span id="rainMalam-TM">--</span></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-val"><span id="rainMalam-SS">--</span></span></div>
           </div>
         </div>
       </div>
       <div class="rain-total">
+        <div class="rl rl-tot duo-only"><div><b>TOTAL</b><span>(mm)</span></div></div>
         <div class="rain-total-label single-only" hidden>
           <span id="labelKumulatif">Kumulatif Hari Ini</span>
           <div><span class="tier-badge" id="rainTierBadge">--</span></div>
         </div>
         <div class="rain-total-value single-only" hidden><span id="rainNow">--</span><small> mm</small></div>
-        <div class="duo duo-only full">
-          <div class="duo-item">
-            <span class="duo-tag code-KI">Kantin</span>
-            <span class="duo-val"><span id="rainNow-KI">--</span><small> mm</small></span>
-            <span class="tier-badge sm" id="rainTierBadge-KI">--</span>
+        <div class="duo duo-only full rv">
+            <div class="duo-item"><span class="duo-val"><span id="rainNow-KI">--</span></span><span class="tier-badge sm" id="rainTierBadge-KI">--</span></div>
+            <div class="duo-item"><span class="duo-val"><span id="rainNow-TM">--</span></span><span class="tier-badge sm" id="rainTierBadge-TM">--</span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-val"><span id="rainNow-SS">--</span></span><span class="tier-badge sm" id="rainTierBadge-SS">--</span></div>
           </div>
-          <div class="duo-item">
-            <span class="duo-tag code-TM">Tama</span>
-            <span class="duo-val"><span id="rainNow-TM">--</span><small> mm</small></span>
-            <span class="tier-badge sm" id="rainTierBadge-TM">--</span>
-          </div>
-          <div class="duo-item" data-st="SS">
-            <span class="duo-tag code-SS">SS</span>
-            <span class="duo-val"><span id="rainNow-SS">--</span><small> mm</small></span>
-            <span class="tier-badge sm" id="rainTierBadge-SS">--</span>
-          </div>
-        </div>
       </div>
     </div>
     <div class="widget-row">
-      <div class="card speedo-widget">
-        <div class="card-label">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.6">
+      <div class="card pcard">
+        <div class="pl" style="--pc-bg:#FDE3D6"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--ember)" stroke-width="1.6">
             <path d="M4 17a8 8 0 0 1 16 0" stroke-linecap="round"/>
             <path d="M12 17l4-5" stroke-linecap="round"/>
             <circle cx="12" cy="17" r="1.3" fill="var(--ember)" stroke="none"/>
-          </svg>
-          Kecepatan Angin
-        </div>
-        <div class="speedo-row single-only" hidden>
+          </svg><b>ANGIN</b><span>(km/jam)</span></div>
+        <div class="pb">
+          <div class="speedo-row single-only" hidden>
           <div>
             <svg class="gauge-svg" viewBox="0 0 100 70">
               <path d="M10 60 A40 40 0 0 1 90 60" fill="none" stroke="var(--surface-2)" stroke-width="7" stroke-linecap="round"/>
@@ -750,62 +751,29 @@
             <div><span class="tier-badge" id="windTierBadge">--</span></div>
           </div>
         </div>
-        <div class="duo-sub single-only" id="windMaxNow" style="margin-top:8px;" hidden>--</div>
-        <div class="duo duo-only full">
-          <div class="duo-item">
-            <span class="duo-tag code-KI">Kantin</span>
-            <div class="duo-val"><span id="windSpeedNow-KI">--</span></div>
-            <span class="tier-badge sm" id="windTierBadge-KI">--</span>
-            <span class="duo-sub" id="windMaxNow-KI">--</span>
-          </div>
-          <div class="duo-item">
-            <span class="duo-tag code-TM">Tama</span>
-            <div class="duo-val"><span id="windSpeedNow-TM">--</span></div>
-            <span class="tier-badge sm" id="windTierBadge-TM">--</span>
-            <span class="duo-sub" id="windMaxNow-TM">--</span>
-          </div>
-          <div class="duo-item" data-st="SS">
-            <span class="duo-tag code-SS">SS</span>
-            <div class="duo-val"><span id="windSpeedNow-SS">--</span></div>
-            <span class="tier-badge sm" id="windTierBadge-SS">--</span>
-            <span class="duo-sub" id="windMaxNow-SS">--</span>
+          <div class="duo-sub single-only" id="windMaxNow" style="margin-top:8px;" hidden>--</div>
+          <div class="duo duo-only full">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="windSpeedNow-KI">--</span></span><span class="tier-badge sm" id="windTierBadge-KI">--</span><div class="mx"><small>MAKS</small><span class="duo-val mxv"><span id="windMaxVal-KI">--</span></span><span class="tier-badge sm" id="windMaxBadge-KI">--</span></div></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="windSpeedNow-TM">--</span></span><span class="tier-badge sm" id="windTierBadge-TM">--</span><div class="mx"><small>MAKS</small><span class="duo-val mxv"><span id="windMaxVal-TM">--</span></span><span class="tier-badge sm" id="windMaxBadge-TM">--</span></div></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="windSpeedNow-SS">--</span></span><span class="tier-badge sm" id="windTierBadge-SS">--</span><div class="mx"><small>MAKS</small><span class="duo-val mxv"><span id="windMaxVal-SS">--</span></span><span class="tier-badge sm" id="windMaxBadge-SS">--</span></div></div>
           </div>
         </div>
-        <div class="duo-sub duo-only" style="text-align:center; margin-top:6px;">km/jam</div>
       </div>
-      <div class="card status-widget">
-        <div class="card-label">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6">
+      <div class="card pcard status-widget">
+        <div class="pl" style="--pc-bg:#E3EEF3"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6">
             <path d="M5 12.5a11 11 0 0 1 14 0M7.8 15.8a7 7 0 0 1 8.4 0M10.6 19a3 3 0 0 1 2.8 0" stroke-linecap="round"/>
             <circle cx="12" cy="19.5" r="0.9" fill="var(--sky)" stroke="none"/>
-          </svg>
-          Status Sistem
+          </svg><b>STATUS</b><span>sistem</span></div>
+        <div class="pb">
+          <div class="single-only" hidden>
+          <div class="metric-row"><div class="k">Data terakhir</div><div class="v" id="statusWaktu" style="font-size:12px">--</div></div>
+          <div class="metric-row"><div class="k">Kondisi</div><div class="v"><span class="tier-badge" id="statusBadge">--</span></div></div>
+          <div class="metric-row"><div class="k">Firmware</div><div class="v" id="statusFirmware" style="font-size:11px">--</div></div>
         </div>
-        <div class="metric-row">
-          <div class="k">Data terakhir</div>
-          <div class="v single-only" id="statusWaktu" style="font-size:12px" hidden>--</div>
-          <div class="duo duo-only status-duo">
-            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="statusWaktu-KI">--</span></div>
-            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="statusWaktu-TM">--</span></div>
-            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-num" id="statusWaktu-SS">--</span></div>
-          </div>
-        </div>
-        <div class="metric-row">
-          <div class="k">Kondisi</div>
-          <div class="v single-only" hidden><span class="tier-badge" id="statusBadge">--</span></div>
-          <div class="duo duo-only status-duo">
-            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="tier-badge sm" id="statusBadge-KI">--</span></div>
-            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="tier-badge sm" id="statusBadge-TM">--</span></div>
-            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="tier-badge sm" id="statusBadge-SS">--</span></div>
-          </div>
-        </div>
-        <div class="metric-row">
-          <div class="k">Firmware</div>
-          <div class="v single-only" id="statusFirmware" style="font-size:11px" hidden>--</div>
-          <div class="duo duo-only status-duo">
-            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="statusFirmware-KI" style="font-size:9.5px">--</span></div>
-            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="statusFirmware-TM" style="font-size:9.5px">--</span></div>
-            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-num" id="statusFirmware-SS" style="font-size:9.5px">--</span></div>
+          <div class="duo duo-only full">
+            <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val st-time"><span id="statusWaktu-KI">--</span></span><span class="st-date" id="statusTgl-KI">--</span><span class="tier-badge sm" id="statusBadge-KI">--</span><span class="st-fw" id="statusFirmware-KI">--</span></div>
+            <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val st-time"><span id="statusWaktu-TM">--</span></span><span class="st-date" id="statusTgl-TM">--</span><span class="tier-badge sm" id="statusBadge-TM">--</span><span class="st-fw" id="statusFirmware-TM">--</span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val st-time"><span id="statusWaktu-SS">--</span></span><span class="st-date" id="statusTgl-SS">--</span><span class="tier-badge sm" id="statusBadge-SS">--</span><span class="st-fw" id="statusFirmware-SS">--</span></div>
           </div>
         </div>
       </div>
@@ -1030,7 +998,15 @@ const WIND_MAX_KMH = 54; // km/jam (setara 15 m/s)
 //        Kode mode "AWS Kebun" tidak lagi menulis KI/TM secara langsung,
 //        melainkan mengikuti daftar STATIONS (stasiun berikutnya cukup
 //        satu entri di array itu + salinan kolomnya di HTML).
-const DASHBOARD_VERSION = "3.2.0";
+// v3.3.0 - Tata letak Page 1 (ringkasan) dirombak untuk HP: tiap kartu
+//        memakai panel judul+ikon di kiri (satuan dalam kurung, mis. SUHU
+//        (°C)) sehingga angka bisa lebih besar; "Kelembaban" jadi RH,
+//        "Ketinggian" jadi ELEV; kartu Curah Hujan disusun per baris
+//        (Pagi/Siang/Malam/Total) dengan nama stasiun sekali di atas; kartu
+//        Angin menampilkan angin MAKS lengkap dengan keterangan
+//        (Tenang..Kuat) berskala sama dengan angin rata-rata; Status Sistem
+//        menampilkan jam, tanggal kecil, kondisi, dan versi firmware ringkas.
+const DASHBOARD_VERSION = "3.3.0";
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
   new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -1396,7 +1372,7 @@ function renderRingkasanDuo(){
     const tren = hitungTrenTekanan(hist, L);
     const subEl = document.getElementById('trenSub-'+kode);
     if (subEl) {
-      subEl.textContent = tren.label;
+      subEl.textContent = tren.label.replace(/\s*hPa/g, '');
       subEl.className = 'duo-sub' +
         (tren.kelas.indexOf('tren-naik') !== -1 ? ' tren-naik' :
          tren.kelas.indexOf('tren-turun') !== -1 ? ' tren-turun' : '');
@@ -1414,12 +1390,21 @@ function renderRingkasanDuo(){
     setTxt('windSpeedNow-'+kode, fmt(windSpeed, 1));
     const tierAngin = kategoriAngin(windSpeed);
     setBadge('windTierBadge-'+kode, tierAngin.label, 'tier-badge sm ' + tierAngin.tier);
-    setTxt('windMaxNow-'+kode, hitungAnginMaksHariIni(hist).ringkas);
+    const maksAngin = hitungAnginMaksHariIni(hist);
+    if (maksAngin.nilai === null) {
+      setTxt('windMaxVal-'+kode, '--');
+      setBadge('windMaxBadge-'+kode, '--', 'tier-badge sm');
+    } else {
+      setTxt('windMaxVal-'+kode, fmt(maksAngin.nilai, 1));
+      const tierMaks = kategoriAngin(maksAngin.nilai);
+      setBadge('windMaxBadge-'+kode, tierMaks.label, 'tier-badge sm ' + tierMaks.tier);
+    }
     if (L.timestamp) {
       const waktuData = new Date(L.timestamp);
       setTxt('statusWaktu-'+kode,
-        waktuData.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) + ' ' +
         waktuData.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}));
+      setTxt('statusTgl-'+kode,
+        waktuData.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}));
       const selisihMenit = (new Date() - waktuData) / 60000;
       let label, kelas;
       if (tanggalDipilih) { label = 'Arsip'; kelas = 'tier-calm'; }
@@ -1429,9 +1414,16 @@ function renderRingkasanDuo(){
       setBadge('statusBadge-'+kode, label, 'tier-badge sm ' + kelas);
     } else {
       setTxt('statusWaktu-'+kode, '--');
+      setTxt('statusTgl-'+kode, '--');
       setBadge('statusBadge-'+kode, '--', 'tier-badge sm');
     }
-    setTxt('statusFirmware-'+kode, L.sumber || (entri.dariServer ? '--' : 'Data contoh'));
+    const elFw = document.getElementById('statusFirmware-'+kode);
+    if (elFw) {
+      const teksFw = L.sumber || (entri.dariServer ? '--' : 'Data contoh');
+      const mVer = /v\d+(\.\d+)*/i.exec(teksFw);
+      elFw.textContent = mVer ? ('fw ' + mVer[0]) : teksFw;
+      elFw.title = teksFw;
+    }
   });
 }
 function setDuoKosong(kode){
@@ -1440,6 +1432,9 @@ function setDuoKosong(kode){
   });
   setBadge('rainTierBadge-'+kode, '--', 'tier-badge sm');
   setBadge('windTierBadge-'+kode, '--', 'tier-badge sm');
+  setBadge('windMaxBadge-'+kode, '--', 'tier-badge sm');
+  setTxt('windMaxVal-'+kode, '--');
+  setTxt('statusTgl-'+kode, '--');
   setBadge('statusBadge-'+kode, '--', 'tier-badge sm');
   const subEl = document.getElementById('trenSub-'+kode);
   if (subEl) subEl.textContent = '--';
@@ -1488,10 +1483,10 @@ function hitungAnginMaksHariIni(hist){
     const v = Math.max(...kandidat);
     if (maks === null || v > maks) { maks = v; waktu = h.timestamp; }
   });
-  if (maks === null) return { ringkas: '--', lengkap: '--' };
-  if (maks <= 0) return { ringkas: 'Maks 0', lengkap: ket + '0 km/jam' };
+  if (maks === null) return { nilai: null, ringkas: '--', lengkap: '--' };
+  if (maks <= 0) return { nilai: 0, ringkas: 'Maks 0', lengkap: ket + '0 km/jam' };
   const jam = new Date(waktu).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-  return { ringkas: 'Maks ' + maks.toFixed(1), lengkap: ket + maks.toFixed(1) + ' km/jam · ' + jam };
+  return { nilai: maks, ringkas: 'Maks ' + maks.toFixed(1), lengkap: ket + maks.toFixed(1) + ' km/jam · ' + jam };
 }function kategoriAngin(kmh){ const ms = (kmh === null || kmh === undefined) ? NaN : kmh / 3.6;
   if (ms === undefined || ms === null || isNaN(ms)) return { label: '--', tier: 'tier-calm' };
   if (ms < 0.3) return { label: 'Tenang', tier: 'tier-calm' };
