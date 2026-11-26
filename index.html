@@ -469,6 +469,7 @@
   }
   .duo-tag.code-KI{color:var(--ember);}
   .duo-tag.code-TM{color:var(--gold);}
+  .duo-tag.code-SS{color:var(--sky);}
   .duo-val{
     display:block;
     font-family:'Fraunces',serif;
@@ -510,6 +511,20 @@
     text-align:right;
   }
   .insight-card .duo-tag{margin-bottom:4px;}
+  /* ---------- 3 stasiun (KI + TM + SS) berdampingan: angka dikecilkan ---------- */
+  body.tiga .duo{gap:6px;}
+  body.tiga .grid-2, body.tiga .widget-row{grid-template-columns:minmax(0,1fr);}
+  body.tiga .rain-segments{grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px;}
+  body.tiga .rseg{padding:9px 3px 8px;}
+  body.tiga .status-duo{max-width:100%;}
+  body.tiga .duo-val{font-size:14px;}
+  body.tiga .duo-val small{font-size:9px;}
+  body.tiga .duo-tag{font-size:7.5px;}
+  body.tiga .duo-sub{font-size:8px;}
+  body.tiga .rseg-duo .duo-val{font-size:11.5px;}
+  body.tiga .status-duo{gap:6px;}
+  body.tiga .duo-num{font-size:9.5px;}
+  body.tiga .tier-badge.sm{font-size:7px; padding:1.5px 4px;}
 </style>
 </head>
 <body>
@@ -556,6 +571,10 @@
             <span class="duo-tag code-TM">Tama</span>
             <span class="duo-val"><span id="tempNow-TM">--</span><small> °C</small></span>
           </div>
+          <div class="duo-item" data-st="SS">
+            <span class="duo-tag code-SS">SS</span>
+            <span class="duo-val"><span id="tempNow-SS">--</span><small> °C</small></span>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -572,6 +591,10 @@
           <div class="duo-item">
             <span class="duo-tag code-TM">Tama</span>
             <span class="duo-val"><span id="humNow-TM">--</span><small> %</small></span>
+          </div>
+          <div class="duo-item" data-st="SS">
+            <span class="duo-tag code-SS">SS</span>
+            <span class="duo-val"><span id="humNow-SS">--</span><small> %</small></span>
           </div>
         </div>
       </div>
@@ -598,6 +621,11 @@
             <span class="duo-val"><span id="presNow-TM">--</span><small> hPa</small></span>
             <span class="duo-sub" id="trenSub-TM">--</span>
           </div>
+          <div class="duo-item" data-st="SS">
+            <span class="duo-tag code-SS">SS</span>
+            <span class="duo-val"><span id="presNow-SS">--</span><small> hPa</small></span>
+            <span class="duo-sub" id="trenSub-SS">--</span>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -614,6 +642,10 @@
           <div class="duo-item">
             <span class="duo-tag code-TM">Tama</span>
             <span class="duo-val"><span id="altNow-TM">--</span><small> mdpl</small></span>
+          </div>
+          <div class="duo-item" data-st="SS">
+            <span class="duo-tag code-SS">SS</span>
+            <span class="duo-val"><span id="altNow-SS">--</span><small> mdpl</small></span>
           </div>
         </div>
       </div>
@@ -638,6 +670,7 @@
           <div class="duo duo-only rseg-duo">
             <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainPagi-KI">--</span><small> mm</small></span></div>
             <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainPagi-TM">--</span><small> mm</small></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="rainPagi-SS">--</span><small> mm</small></span></div>
           </div>
         </div>
         <div class="rseg rseg-siang">
@@ -650,6 +683,7 @@
           <div class="duo duo-only rseg-duo">
             <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainSiang-KI">--</span><small> mm</small></span></div>
             <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainSiang-TM">--</span><small> mm</small></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="rainSiang-SS">--</span><small> mm</small></span></div>
           </div>
         </div>
         <div class="rseg rseg-malam">
@@ -661,6 +695,7 @@
           <div class="duo duo-only rseg-duo">
             <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-val"><span id="rainMalam-KI">--</span><small> mm</small></span></div>
             <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-val"><span id="rainMalam-TM">--</span><small> mm</small></span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-val"><span id="rainMalam-SS">--</span><small> mm</small></span></div>
           </div>
         </div>
       </div>
@@ -680,6 +715,11 @@
             <span class="duo-tag code-TM">Tama</span>
             <span class="duo-val"><span id="rainNow-TM">--</span><small> mm</small></span>
             <span class="tier-badge sm" id="rainTierBadge-TM">--</span>
+          </div>
+          <div class="duo-item" data-st="SS">
+            <span class="duo-tag code-SS">SS</span>
+            <span class="duo-val"><span id="rainNow-SS">--</span><small> mm</small></span>
+            <span class="tier-badge sm" id="rainTierBadge-SS">--</span>
           </div>
         </div>
       </div>
@@ -724,6 +764,12 @@
             <span class="tier-badge sm" id="windTierBadge-TM">--</span>
             <span class="duo-sub" id="windMaxNow-TM">--</span>
           </div>
+          <div class="duo-item" data-st="SS">
+            <span class="duo-tag code-SS">SS</span>
+            <div class="duo-val"><span id="windSpeedNow-SS">--</span></div>
+            <span class="tier-badge sm" id="windTierBadge-SS">--</span>
+            <span class="duo-sub" id="windMaxNow-SS">--</span>
+          </div>
         </div>
         <div class="duo-sub duo-only" style="text-align:center; margin-top:6px;">km/jam</div>
       </div>
@@ -741,6 +787,7 @@
           <div class="duo duo-only status-duo">
             <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="statusWaktu-KI">--</span></div>
             <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="statusWaktu-TM">--</span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-num" id="statusWaktu-SS">--</span></div>
           </div>
         </div>
         <div class="metric-row">
@@ -749,6 +796,7 @@
           <div class="duo duo-only status-duo">
             <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="tier-badge sm" id="statusBadge-KI">--</span></div>
             <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="tier-badge sm" id="statusBadge-TM">--</span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="tier-badge sm" id="statusBadge-SS">--</span></div>
           </div>
         </div>
         <div class="metric-row">
@@ -757,6 +805,7 @@
           <div class="duo duo-only status-duo">
             <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="statusFirmware-KI" style="font-size:9.5px">--</span></div>
             <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="statusFirmware-TM" style="font-size:9.5px">--</span></div>
+            <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-num" id="statusFirmware-SS" style="font-size:9.5px">--</span></div>
           </div>
         </div>
       </div>
@@ -798,6 +847,10 @@
       <div class="insight-title"><span class="duo-tag code-TM">Tama</span></div>
       <div class="insight-body" id="fenomenaBody-TM">Menganalisa data curah hujan Tanah Manis...</div>
     </div>
+    <div class="card insight-card duo-only" data-st="SS">
+      <div class="insight-title"><span class="duo-tag code-SS">SS</span></div>
+      <div class="insight-body" id="fenomenaBody-SS">Menganalisa data curah hujan Sumbersari...</div>
+    </div>
     <div class="card" style="margin-bottom:9px;">
       <div class="metric-row">
         <div class="k">Hari kering berturut-turut</div>
@@ -805,6 +858,7 @@
         <div class="duo duo-only status-duo">
           <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="hariKering-KI">--</span></div>
           <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="hariKering-TM">--</span></div>
+          <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-num" id="hariKering-SS">--</span></div>
         </div>
       </div>
       <div class="metric-row">
@@ -813,6 +867,7 @@
         <div class="duo duo-only status-duo">
           <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="hujan7Hari-KI">--</span></div>
           <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="hujan7Hari-TM">--</span></div>
+          <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-num" id="hujan7Hari-SS">--</span></div>
         </div>
       </div>
       <div class="metric-row">
@@ -825,6 +880,7 @@
         <div class="duo duo-only status-duo">
           <div class="duo-item"><span class="duo-tag code-KI">Kantin</span><span class="duo-num" id="proyeksi-KI" style="font-size:9px;">--</span></div>
           <div class="duo-item"><span class="duo-tag code-TM">Tama</span><span class="duo-num" id="proyeksi-TM" style="font-size:9px;">--</span></div>
+          <div class="duo-item" data-st="SS"><span class="duo-tag code-SS">SS</span><span class="duo-num" id="proyeksi-SS" style="font-size:9px;">--</span></div>
         </div>
       </div>
     </div>
@@ -890,25 +946,42 @@
 // ============================================================
 // KONFIGURASI MULTI-STASIUN
 // ============================================================
-// Untuk mengaktifkan stasiun baru (mis. Sumbersari, kode SS):
-// tambah satu entri di array ini dengan apiUrl-nya, active:true.
-// Tidak perlu ubah kode lain - warna SS sudah disiapkan di CSS.
+// Daftar stasiun. Tiap stasiun punya:
+//   pendek = label singkat di card & grafik, warna = warna di grafik,
+//   wajib  = true -> selalu tampil; false -> tampil OTOMATIS begitu
+//            Web App-nya mengirim data pertama (belum ada data = tersembunyi,
+//            jadi aman diunggah sebelum stasiun itu hidup).
 const STATIONS = [
   {
     code: "KI",
     name: "Kantor Induk",
+    pendek: "Kantin",
+    warna: "#E85A2B",
     apiUrl: "https://script.google.com/macros/s/AKfycbwOve9m3PhrEai5IlqIfmJligdyR0oxN_ohr-lfzRP6yRACEshhZvmI18DUDU-mBOO7/exec",
     active: true,
+    wajib: true,
     hasHistori5Tahun: true
   },
   {
     code: "TM",
     name: "Tanah Manis",
+    pendek: "Tama",
+    warna: "#F0A93E",
     apiUrl: "https://script.google.com/macros/s/AKfycbxtlycf76qd6GSBe2AzapqC6yMWwAYtDWalQsFBwWT479Tx6Yb1AK6OUoiuZR_O1GJg1w/exec",
     active: true,
+    wajib: true,
+    hasHistori5Tahun: false
+  },
+  {
+    code: "SS",
+    name: "Sumbersari",
+    pendek: "SS",
+    warna: "#2E9CCA",
+    apiUrl: "https://script.google.com/macros/s/AKfycbzZvLLfJxxQ-jkTP2NykKUElY3gLKFr6q83L2tScvvfqfrtc80lZEwpfpyOrYKdnvGz/exec",
+    active: true,
+    wajib: false,
     hasHistori5Tahun: false
   }
-  // { code: "SS", name: "Sumbersari", apiUrl: "", active: false, hasHistori5Tahun: false }
 ];
 const REFRESH_MS = 60000;
 const WIND_MAX_KMH = 54; // km/jam (setara 15 m/s)
@@ -948,7 +1021,16 @@ const WIND_MAX_KMH = 54; // km/jam (setara 15 m/s)
 //        Apps Script yang mendukung ?tanggal=YYYY-MM-DD; kalau belum, muncul
 //        pesan "arsip gagal dimuat" (data real-time tidak ikut tertukar).
 //        Halaman Analisa Pembungaan tetap memakai data keseluruhan.
-const DASHBOARD_VERSION = "3.1.2";
+// v3.2.0 - Stasiun ketiga: Afdeling Sumbersari (kode SS, label "SS",
+//        warna biru langit). Muncul OTOMATIS (pill saklar, kolom di tiap
+//        card, garis/bar di grafik, kartu analisa) begitu Web App
+//        Sumbersari mengirim data pertama; sebelum itu tersembunyi, jadi
+//        tampilan 2 stasiun v3.1.2 tidak berubah. Saat 3 stasiun tampil,
+//        angka di card dikecilkan agar muat berdampingan di layar ponsel.
+//        Kode mode "AWS Kebun" tidak lagi menulis KI/TM secara langsung,
+//        melainkan mengikuti daftar STATIONS (stasiun berikutnya cukup
+//        satu entri di array itu + salinan kolomnya di HTML).
+const DASHBOARD_VERSION = "3.2.0";
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
   new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -975,13 +1057,31 @@ function tanggalPendek(str){
 // ============================================================
 // SAKLAR MODE TAMPILAN (pills): "AWS Kebun" (gabungan) + tiap stasiun
 // ============================================================
-const MODES = [{ code: 'KEBUN', label: 'AWS Kebun' }]
-  .concat(STATIONS.filter(s => s.active).map(s => ({ code: s.code, label: s.name })));
+// Stasiun yang tampil: aktif DAN (wajib, atau sudah pernah mengirim data asli)
+function stasiunSiap(){
+  return STATIONS.filter(s => s.active &&
+    (s.wajib || (cacheLive[s.code] && cacheLive[s.code].dariServer)));
+}
+function hitungModes(){
+  return [{ code: 'KEBUN', label: 'AWS Kebun' }]
+    .concat(stasiunSiap().map(s => ({ code: s.code, label: s.name })));
+}
+// Tampilkan/sembunyikan kolom stasiun (atribut data-st) sesuai ketersediaan
+// & mode aktif, dan kecilkan angka kalau ada 3 stasiun
+function terapkanKetersediaan(){
+  const siap = stasiunSiap().map(s => s.code);
+  const isKebun = (viewMode === 'KEBUN');
+  document.querySelectorAll('[data-st]').forEach(el => {
+    const hanyaKebun = el.classList.contains('duo-only');
+    el.hidden = !siap.includes(el.dataset.st) || (hanyaKebun && !isKebun);
+  });
+  document.body.classList.toggle('tiga', siap.length >= 3);
+}
 
 function bangunSaklarMode(){
   const wadah = document.getElementById('stationSwitch');
   wadah.innerHTML = '';
-  MODES.forEach(m => {
+  hitungModes().forEach(m => {
     const pill = document.createElement('div');
     pill.className = 'station-pill code-' + m.code + (m.code === viewMode ? ' active' : '');
     pill.dataset.kode = m.code;
@@ -1170,6 +1270,7 @@ async function muatData(){
       }
     }
   }));
+  bangunSaklarMode();
   renderDashboard();
 }
 // ============================================================
@@ -1178,6 +1279,7 @@ async function muatData(){
 // ============================================================
 function renderDashboard(){
   toggleModeSections();
+  terapkanKetersediaan();
   setTxt('judulHujan', tanggalDipilih ? 'Curah Hujan ' + tanggalPendek(tanggalDipilih) : 'Curah Hujan Hari Ini');
   setTxt('labelKumulatif', tanggalDipilih ? 'Kumulatif Hari Itu' : 'Kumulatif Hari Ini');
   setTxt('judulRingkasan', tanggalDipilih ? 'Ringkasan Kondisi · Data Terakhir ' + tanggalPendek(tanggalDipilih) : 'Ringkasan Kondisi Saat Ini');
@@ -1279,7 +1381,7 @@ function renderRingkasanSingle(data, dariServer){
 // berdampingan ke id ber-akhiran -KI / -TM di tiap card
 // ============================================================
 function renderRingkasanDuo(){
-  ['KI','TM'].forEach(kode => {
+  stasiunSiap().map(s => s.code).forEach(kode => {
     const entri = cacheData[kode];
     if (!entri || !entri.data || !entri.data.latest) {
       setDuoKosong(kode);
@@ -1453,55 +1555,66 @@ function buatLabelWaktu(hist){
            d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
   });
 }
-// Gabungkan histori 2 stasiun jadi 1 sumbu waktu (dibulatkan ke
+// Gabungkan histori beberapa stasiun jadi 1 sumbu waktu (dibulatkan ke
 // kelipatan 5 menit terdekat) supaya bisa dibandingkan di 1 grafik,
-// walau kedua stasiun kirim data secara independen & belum tentu
-// persis bersamaan.
-function gabungHistori(histKI, histTM, field){
+// walau stasiun-stasiun itu kirim data secara independen & belum tentu
+// persis bersamaan. daftar = [{kode, hist}, ...]
+// Hasil: { labels, KI:[...], TM:[...], SS:[...] }
+function gabungHistori(daftar, field){
   const BUCKET_MS = 5 * 60 * 1000;
   const titik = new Map();
-  function tambah(hist, kode){
+  daftar.forEach(({ kode, hist }) => {
     (hist || []).forEach(h => {
       if (!h.timestamp) return;
       const t = new Date(h.timestamp).getTime();
       if (isNaN(t)) return;
       const bucket = Math.round(t / BUCKET_MS) * BUCKET_MS;
-      if (!titik.has(bucket)) titik.set(bucket, { t: bucket, KI: null, TM: null });
+      if (!titik.has(bucket)) {
+        const p = { t: bucket };
+        daftar.forEach(d => { p[d.kode] = null; });
+        titik.set(bucket, p);
+      }
       const nilai = Number(h[field]);
       if (!isNaN(nilai)) titik.get(bucket)[kode] = nilai;
     });
-  }
-  tambah(histKI, 'KI');
-  tambah(histTM, 'TM');
+  });
   const urut = Array.from(titik.values()).sort((a, b) => a.t - b.t);
-  const labels = urut.map(p => {
+  const hasil = { labels: urut.map(p => {
     const d = new Date(p.t);
     return d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) + ' ' +
            d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-  });
-  return { labels, KI: urut.map(p => p.KI), TM: urut.map(p => p.TM) };
+  }) };
+  daftar.forEach(d => { hasil[d.kode] = urut.map(p => p[d.kode]); });
+  return hasil;
 }
 // Sama seperti di atas, tapi untuk data harian (kunci gabung berupa
-// tanggal kalender, bukan timestamp presisi menit)
-function gabungHarian(harianKI, harianTM){
+// tanggal kalender, bukan timestamp presisi menit). daftar = [{kode, harian}]
+function gabungHarian(daftar){
   const peta = new Map();
-  function tambah(dataHarian, kode){
-    (dataHarian || []).forEach(h => {
+  daftar.forEach(({ kode, harian }) => {
+    (harian || []).forEach(h => {
       const d = new Date(h.tanggal);
       const valid = !isNaN(d.getTime());
       const key = valid ? d.toISOString().slice(0, 10) : String(h.tanggal);
-      if (!peta.has(key)) peta.set(key, { key, urut: valid ? d.getTime() : 0, KI: null, TM: null });
+      if (!peta.has(key)) {
+        const p = { key, urut: valid ? d.getTime() : 0 };
+        daftar.forEach(x => { p[x.kode] = null; });
+        peta.set(key, p);
+      }
       peta.get(key)[kode] = Math.max(0, Number(h.curah_hujan) || 0);
     });
-  }
-  tambah(harianKI, 'KI');
-  tambah(harianTM, 'TM');
+  });
   const urut = Array.from(peta.values()).sort((a, b) => a.urut - b.urut);
-  const labels = urut.map(p => {
+  const hasil = { labels: urut.map(p => {
     const d = new Date(p.urut);
     return (p.urut && !isNaN(d.getTime())) ? d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit'}) : p.key;
-  });
-  return { labels, KI: urut.map(p => p.KI), TM: urut.map(p => p.TM) };
+  }) };
+  daftar.forEach(d => { hasil[d.kode] = urut.map(p => p[d.kode]); });
+  return hasil;
+}
+// Susun array "series" grafik (satu garis/bar per stasiun) dari hasil gabung
+function seriStasiun(aktif, g){
+  return aktif.map(s => ({ data: g[s.code], color: s.warna, label: s.pendek }));
 }
 // ============================================================
 // GRAFIK - line & bar chart, menerima array "series" supaya bisa
@@ -1583,33 +1696,22 @@ function renderTrenSingle(data){
 // dalam 1 grafik per parameter, digabung berdasarkan waktu terdekat
 // ============================================================
 function renderTrenDuo(){
-  const histKI = (cacheData.KI && cacheData.KI.data && cacheData.KI.data.history) || [];
-  const histTM = (cacheData.TM && cacheData.TM.data && cacheData.TM.data.history) || [];
-  const warnaKI = '#E85A2B', warnaTM = '#F0A93E';
-  const gSuhu = gabungHistori(histKI, histTM, 'suhu');
-  chartSuhu = buatLineChart(chartSuhu, 'chartSuhu', gSuhu.labels, [
-    { data: gSuhu.KI, color: warnaKI, label: 'Kantin' },
-    { data: gSuhu.TM, color: warnaTM, label: 'Tama' }
-  ]);
-  const gHum = gabungHistori(histKI, histTM, 'kelembaban');
-  chartHum = buatLineChart(chartHum, 'chartHum', gHum.labels, [
-    { data: gHum.KI, color: warnaKI, label: 'Kantin' },
-    { data: gHum.TM, color: warnaTM, label: 'Tama' }
-  ]);
-  const gPres = gabungHistori(histKI, histTM, 'tekanan');
-  chartPres = buatLineChart(chartPres, 'chartPres', gPres.labels, [
-    { data: gPres.KI, color: warnaKI, label: 'Kantin' },
-    { data: gPres.TM, color: warnaTM, label: 'Tama' }
-  ]);
-  const harianKI = (cacheLive.KI && cacheLive.KI.data && cacheLive.KI.data.harian) || [];
-  const harianTM = (cacheLive.TM && cacheLive.TM.data && cacheLive.TM.data.harian) || [];
-  const gHarian = gabungHarian(harianKI, harianTM);
-  chartRainHarian = buatBarChart(chartRainHarian, 'chartRainHarian', gHarian.labels, [
-    { data: gHarian.KI, color: warnaKI, label: 'Kantin' },
-    { data: gHarian.TM, color: warnaTM, label: 'Tama' }
-  ]);
+  const aktif = stasiunSiap();
+  const daftarHist = aktif.map(st => ({ kode: st.code,
+    hist: (cacheData[st.code] && cacheData[st.code].data && cacheData[st.code].data.history) || [] }));
+  const daftarHarian = aktif.map(st => ({ kode: st.code,
+    harian: (cacheLive[st.code] && cacheLive[st.code].data && cacheLive[st.code].data.harian) || [] }));
+  const gSuhu = gabungHistori(daftarHist, 'suhu');
+  chartSuhu = buatLineChart(chartSuhu, 'chartSuhu', gSuhu.labels, seriStasiun(aktif, gSuhu));
+  const gHum = gabungHistori(daftarHist, 'kelembaban');
+  chartHum = buatLineChart(chartHum, 'chartHum', gHum.labels, seriStasiun(aktif, gHum));
+  const gPres = gabungHistori(daftarHist, 'tekanan');
+  chartPres = buatLineChart(chartPres, 'chartPres', gPres.labels, seriStasiun(aktif, gPres));
+  const gHarian = gabungHarian(daftarHarian);
+  chartRainHarian = buatBarChart(chartRainHarian, 'chartRainHarian', gHarian.labels, seriStasiun(aktif, gHarian));
   document.getElementById('trenNote').textContent =
-    'Menampilkan perbandingan data Kantor Induk (Kantin) & Tanah Manis (Tama) yang tersedia sejak masing-masing sensor terpasang.';
+    'Menampilkan perbandingan data ' + aktif.map(st => st.name + ' (' + st.pendek + ')').join(', ') +
+    ' yang tersedia sejak masing-masing sensor terpasang.';
 }
 // ============================================================
 // ANALISA PEMBUNGAAN (Page 3) - logika deteksi hujan pembuka murni
@@ -1682,17 +1784,14 @@ function renderAnalisaDuo(){
   const dalamPeriodeBunga = (bulan >= 5 && bulan <= 8);
   document.getElementById('badgePeriode').textContent = dalamPeriodeBunga ? 'Taksasi Bunga' : 'Di luar periode';
   document.getElementById('badgePeriode').className = 'badge ' + (dalamPeriodeBunga ? 'wet' : 'dry');
-  const harianKIraw = (cacheLive.KI && cacheLive.KI.data && cacheLive.KI.data.harian) || [];
-  const harianTMraw = (cacheLive.TM && cacheLive.TM.data && cacheLive.TM.data.harian) || [];
-  const hasilKI = hitungAnalisa(harianDariServer(harianKIraw), namaStasiun('KI'));
-  const hasilTM = hitungAnalisa(harianDariServer(harianTMraw), namaStasiun('TM'));
-  tulisAnalisa(hasilKI, '-KI');
-  tulisAnalisa(hasilTM, '-TM');
-  const gabung = gabungHarian(harianKIraw, harianTMraw);
-  chartFlowering = buatBarChart(chartFlowering, 'chartFlowering', gabung.labels, [
-    { data: gabung.KI, color: '#E85A2B', label: 'Kantin' },
-    { data: gabung.TM, color: '#F0A93E', label: 'Tama' }
-  ]);
+  const aktif = stasiunSiap();
+  const daftarHarian = aktif.map(st => ({ kode: st.code,
+    harian: (cacheLive[st.code] && cacheLive[st.code].data && cacheLive[st.code].data.harian) || [] }));
+  daftarHarian.forEach(d => {
+    tulisAnalisa(hitungAnalisa(harianDariServer(d.harian), namaStasiun(d.kode)), '-' + d.kode);
+  });
+  const gabung = gabungHarian(daftarHarian);
+  chartFlowering = buatBarChart(chartFlowering, 'chartFlowering', gabung.labels, seriStasiun(aktif, gabung));
 }
 // ============================================================
 // DATA HISTORIS 5 TAHUN (KHUSUS KANTOR INDUK) - CH periode bunga
