@@ -14,6 +14,7 @@
     --surface-2:#F5EAD2;
     --text:#2B2117;
     --text-dim:#8A7A63;
+    --text-card:#55473A;
     --ember:#E85A2B;
     --ember-light:#F17B4D;
     --gold:#F0A93E;
@@ -530,7 +531,7 @@
   .pcard{display:flex; padding:0; overflow:hidden; margin-bottom:0;}
   .pl{width:78px; flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:10px 4px; text-align:center; background:var(--pc-bg);}
   .pl .icon{width:24px; height:24px;}
-  .pl b{font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.1em; color:var(--text);}
+  .pl b{font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.1em; color:var(--text-card);}
   .pl span{font-size:11px; color:var(--text-dim);}
   .pb{flex:1; min-width:0; padding:11px 12px; display:flex; flex-direction:column; justify-content:center;}
   .pb .duo{gap:6px;}
@@ -579,10 +580,17 @@
   body.tiga .pb .tier-badge.sm, body.tiga .rain-total .tier-badge.sm{font-size:11px; padding:2px 6px;}
   /* ---------- v3.3.1: font angka modern + latar sisi kanan kartu berwarna ---------- */
   .pb{background:var(--pb-bg,#fff);}
+  .duo-item.offline{filter:grayscale(1); opacity:0.45; transition:opacity 0.3s;}
   .pb .duo-val, .pb .card-value, .rrow .duo-val, .rrow .rseg-value, .rain-total .duo-val, .rain-total-value{
     font-family:'Plus Jakarta Sans','IBM Plex Sans',sans-serif; font-weight:600; letter-spacing:-0.01em;}
   .pb .card-value{font-size:28px;}
   .pb .duo-val{font-variant-numeric:tabular-nums;}
+  /* ---------- v3.3.3: warna teks kartu lebih lembut; angka kartu parameter lebih kecil ---------- */
+  .card{color:var(--text-card);}
+  .grid-2 .pb .duo-val, body.tiga .grid-2 .pb .duo-val{font-size:24px; font-weight:500;}
+  .grid-2 .pb .card-value{font-size:25px; font-weight:500;}
+  .pb .duo-val.st-time, body.tiga .pb .duo-val.st-time{font-size:15px; font-weight:500; line-height:1.25;}
+  .st-date{font-size:11px;}
 </style>
 </head>
 <body>
@@ -1015,7 +1023,15 @@ const WIND_MAX_KMH = 54; // km/jam (setara 15 m/s)
 // v3.3.1 - Font angka di kartu Page 1 diganti ke Plus Jakarta Sans (lebih
 //        modern daripada Fraunces); sisi kanan kartu parameter diberi tint
 //        tipis senada panel kirinya (Suhu, RH, Tekanan, ELEV, Angin, Status).
-const DASHBOARD_VERSION = "3.3.1";
+// v3.3.2 - Stasiun yang offline (tidak ada data >= 60 menit) tampil abu-abu
+//        di kartu ringkasan mode AWS Kebun; badge Offline di Status Sistem
+//        tetap berwarna.
+// v3.3.3 - Warna teks di semua kartu dilembutkan (--text-card, cokelat tua
+//        yang tidak terlalu pekat); angka kartu Suhu/RH/Tekanan/ELEV
+//        dikecilkan (27px -> 24px) dan dibuat lebih ringan (weight 500).
+// v3.3.4 - Jam di Status Sistem dikecilkan (22px -> 15px) agar tidak
+//        terbaca sebagai parameter ukur.
+const DASHBOARD_VERSION = "3.3.4";
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
   new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -1366,6 +1382,17 @@ function renderRingkasanSingle(data, dariServer){
 // RINGKASAN (Page 1) - mode "AWS Kebun": tulis nilai KI & TM
 // berdampingan ke id ber-akhiran -KI / -TM di tiap card
 // ============================================================
+// Stasiun yang tidak mengirim data >= 60 menit ditandai offline: kolomnya
+// di semua kartu (kecuali kartu Status Sistem, supaya badge Offline tetap
+// terbaca) dibuat abu-abu. Hilang sendiri begitu data baru masuk.
+const BATAS_OFFLINE_MENIT = 60;
+function tandaiOffline(kode, offline){
+  document.querySelectorAll('#page-0 .duo-item').forEach(el => {
+    if (el.closest('.status-widget')) return;
+    const milikStasiun = el.querySelector('[id$="-' + kode + '"]') || el.querySelector('.code-' + kode);
+    if (milikStasiun) el.classList.toggle('offline', offline);
+  });
+}
 function renderRingkasanDuo(){
   stasiunSiap().map(s => s.code).forEach(kode => {
     const entri = cacheData[kode];
@@ -1375,6 +1402,8 @@ function renderRingkasanDuo(){
     }
     const L = entri.data.latest;
     const hist = entri.data.history || [];
+    const umurMenit = L.timestamp ? (new Date() - new Date(L.timestamp)) / 60000 : 0;
+    tandaiOffline(kode, !tanggalDipilih && umurMenit >= BATAS_OFFLINE_MENIT);
     setTxt('tempNow-'+kode, fmt(L.suhu, 1));
     setTxt('humNow-'+kode, fmt(L.kelembaban, 0));
     setTxt('presNow-'+kode, fmt(L.tekanan, 1));
