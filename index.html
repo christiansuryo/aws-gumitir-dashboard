@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Automatic Weather Station - Kebun Gunung Gumitir</title>
+<meta name="theme-color" content="#FDF6E9">
+<meta name="application-name" content="AWS Gumitir">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AWS Gumitir">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
@@ -591,6 +600,8 @@
   .grid-2 .pb .card-value{font-size:25px; font-weight:500;}
   .pb .duo-val.st-time, body.tiga .pb .duo-val.st-time{font-size:15px; font-weight:500; line-height:1.25;}
   .st-date{font-size:11px;}
+  .btn-pasang{margin-top:6px; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.04em;
+    color:var(--text-card); background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 10px; cursor:pointer;}
 </style>
 </head>
 <body>
@@ -605,6 +616,7 @@
       <div class="dot-live"></div>
       <span id="lastUpdate">memuat...</span>
     </div>
+    <button type="button" class="btn-pasang" id="btnPasang" hidden>Pasang aplikasi</button>
   </div>
 </div>
 <div class="station-switch" id="stationSwitch">
@@ -1031,7 +1043,10 @@ const WIND_MAX_KMH = 54; // km/jam (setara 15 m/s)
 //        dikecilkan (27px -> 24px) dan dibuat lebih ringan (weight 500).
 // v3.3.4 - Jam di Status Sistem dikecilkan (22px -> 15px) agar tidak
 //        terbaca sebagai parameter ukur.
-const DASHBOARD_VERSION = "3.3.4";
+// v3.4.0 - Bisa dipasang sebagai aplikasi di HP (PWA): manifest, ikon,
+//        service worker, dan tombol "Pasang aplikasi" di header (muncul
+//        hanya bila browser menawarkan pemasangan).
+const DASHBOARD_VERSION = "3.4.0";
 document.getElementById('versionBadge').textContent = 'v' + DASHBOARD_VERSION;
 document.getElementById('todayDate').textContent =
   new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -1943,6 +1958,34 @@ setInterval(muatData, REFRESH_MS);
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) muatData();
 });
+
+// ============================================================
+// PWA: tombol "Pasang aplikasi" + service worker (v3.4.0)
+// ============================================================
+let promptPasang = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  promptPasang = e;
+  const b = document.getElementById('btnPasang');
+  if (b) b.hidden = false;
+});
+window.addEventListener('appinstalled', () => {
+  promptPasang = null;
+  const b = document.getElementById('btnPasang');
+  if (b) b.hidden = true;
+});
+document.getElementById('btnPasang').addEventListener('click', async () => {
+  if (!promptPasang) return;
+  promptPasang.prompt();
+  try { await promptPasang.userChoice; } catch (e) {}
+  promptPasang = null;
+  document.getElementById('btnPasang').hidden = true;
+});
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.warn('Service worker gagal:', err));
+  });
+}
 </script>
 </body>
 </html>
